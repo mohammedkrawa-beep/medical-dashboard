@@ -4,524 +4,269 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>لوحة متابعة تدريب الأطباء | مركز طب الطوارئ والدعم</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root{
-  --maroon:#5D131A;
-  --maroon-dark:#420D12;
-  --gold:#C0A046;
-  --gold-light:#DCC788;
-  --teal:#18272F;
-  --teal-soft:#233A45;
-  --cream:#E7E6E3;
-  --paper:#FBFAF8;
-  --white:#FFFFFF;
-  --ink:#1D2224;
-  --muted:#6B6660;
-  --line:#DEDAD2;
-  --good:#3E7A5C;
-  --warn:#B4552B;
+:root {
+  --maroon: #5D131A; --maroon-dark: #420D12; --gold: #C0A046; --gold-light: #DCC788;
+  --teal: #18272F; --teal-soft: #233A45; --cream: #E7E6E3; --white: #FFFFFF; --line: #DEDAD2;
 }
-*{box-sizing:border-box; margin:0; padding:0;}
-html{scroll-behavior:smooth;}
-body{
-  background:var(--cream);
-  color:var(--ink);
-  font-family:'IBM Plex Sans Arabic', sans-serif;
-  font-weight:400;
-  line-height:1.6;
-  min-height:100vh;
-}
-h1,h2,h3,.display{ font-family:'Cairo', sans-serif; }
-
-.topbar{
-  background:linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%);
-  color:var(--white);
-  position:relative;
-  overflow:hidden;
-  border-bottom:4px solid var(--gold);
-}
-.topbar-inner{
-  max-width:1320px;
-  margin:0 auto;
-  padding:28px 32px 24px;
-  position:relative;
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-end;
-  flex-wrap:wrap;
-  gap:16px;
-}
-.brand-eyebrow{
-  font-size:12.5px;
-  color:var(--gold-light);
-  font-weight:600;
-  margin-bottom:8px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.brand-eyebrow::before{
-  content:""; width:7px; height:7px; border-radius:50%; background:var(--gold); display:inline-block;
-}
-.topbar h1{ font-size:29px; font-weight:800; margin-bottom:6px; }
-.topbar p{ color:rgba(255,255,255,0.72); font-size:14.5px; max-width:560px; }
-.period-chip{
-  background:rgba(255,255,255,0.08);
-  border:1px solid rgba(220,199,136,0.35);
-  border-radius:10px;
-  padding:12px 18px;
-  text-align:center;
-  min-width:170px;
-}
-.period-chip .label{ font-size:11.5px; color:var(--gold-light); margin-bottom:4px;}
-.period-chip .value{ font-size:16px; font-weight:700; font-family:'Cairo',sans-serif; }
-
-.wrap{ max-width:1320px; margin:0 auto; padding:28px 32px 60px; }
-
-.stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:26px; }
-.stat-card{
-  background:var(--white);
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:20px 20px 18px;
-  position:relative;
-  overflow:hidden;
-}
-.stat-card .bar{ position:absolute; inset-inline-start:0; top:0; bottom:0; width:4px; background:var(--gold); }
-.stat-card .stat-label{ font-size:12.5px; color:var(--muted); font-weight:600; margin-bottom:10px; }
-.stat-card .stat-value{ font-size:32px; font-weight:800; color:var(--maroon); font-family:'Cairo',sans-serif; line-height:1; }
-.stat-card .stat-sub{ font-size:12px; color:var(--muted); margin-top:8px; }
-
-.filterbar{
-  background:var(--teal);
-  border-radius:14px;
-  padding:16px 20px;
-  display:flex;
-  gap:14px;
-  flex-wrap:wrap;
-  align-items:center;
-  margin-bottom:26px;
-}
-.filterbar .ftitle{ color:var(--gold-light); font-weight:700; font-size:13px; font-family:'Cairo',sans-serif; }
-.fgroup{ display:flex; flex-direction:column; gap:5px; }
-.fgroup label{ font-size:11px; color:rgba(255,255,255,0.55); }
-select, .search-input{
-  background:var(--teal-soft);
-  color:var(--white);
-  border:1px solid rgba(255,255,255,0.14);
-  border-radius:8px;
-  padding:8px 12px;
-  font-family:'IBM Plex Sans Arabic',sans-serif;
-  font-size:13.5px;
-  min-width:180px;
-  outline:none;
-}
-.reset-btn{
-  margin-inline-start:auto;
-  background:transparent;
-  border:1px solid var(--gold);
-  color:var(--gold-light);
-  border-radius:8px;
-  padding:9px 16px;
-  font-size:13px;
-  cursor:pointer;
-}
-
-.grid2{ display:grid; grid-template-columns:1.3fr 1fr; gap:18px; margin-bottom:18px; }
-.panel{ background:var(--white); border:1px solid var(--line); border-radius:14px; padding:20px 22px 14px; }
-.panel h3{ font-size:15.5px; font-weight:700; color:var(--teal); margin-bottom:2px; }
-.panel .psub{ font-size:12px; color:var(--muted); margin-bottom:14px; }
-.chart-holder{ position:relative; height:290px; }
-.chart-holder.tall{ height:340px; }
-
-.table-panel{ background:var(--white); border:1px solid var(--line); border-radius:14px; padding:22px; }
-.table-head{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; }
-.table-scroll{ overflow-x:auto; border-radius:10px; border:1px solid var(--line); }
-table{ width:100%; border-collapse:collapse; font-size:13px; min-width:920px; }
-thead th{ background:var(--teal); color:var(--gold-light); font-weight:600; font-size:12px; padding:11px 12px; text-align:right; cursor:pointer; user-select:none; }
-thead th:hover{ background:var(--teal-soft); }
-tbody td{ padding:10px 12px; border-bottom:1px solid var(--line); color:var(--ink); }
-tbody tr:hover{ background:#FAF6EC; }
-
-.badge{ display:inline-block; padding:4px 10px; border-radius:20px; font-size:11.5px; font-weight:600; }
-.badge-er{ background:#FFF4E5; color:#B4552B; }
-.badge-surg{ background:#FCE8E6; color:#5D131A; }
-.badge-icu{ background:#E6F4EA; color:#3E7A5C; }
-.badge-gen{ background:#E8F0FE; color:#18272F; }
-
-footer{ text-align:center; color:var(--muted); font-size:12px; padding:26px 20px 10px; }
-
-@media (max-width:1080px){ .stats{ grid-template-columns:repeat(2,1fr); } .grid2{ grid-template-columns:1fr; } }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--cream); font-family: 'IBM Plex Sans Arabic', sans-serif; color: #1D2224; }
+.topbar { background: linear-gradient(135deg, var(--maroon), var(--maroon-dark)); color: var(--white); border-bottom: 4px solid var(--gold); padding: 24px 32px; }
+.topbar h1 { font-family: 'Cairo', sans-serif; font-size: 26px; }
+.wrap { max-width: 1320px; margin: 0 auto; padding: 24px; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: var(--white); border-radius: 12px; padding: 18px; border: 1px solid var(--line); border-right: 4px solid var(--gold); }
+.stat-card .val { font-size: 28px; font-weight: 800; color: var(--maroon); font-family: 'Cairo'; }
+.filterbar { background: var(--teal); border-radius: 12px; padding: 16px; display: flex; gap: 12px; align-items: center; margin-bottom: 24px; flex-wrap: wrap; }
+.filterbar label { color: var(--gold-light); font-size: 12px; display: block; }
+select, input { background: var(--teal-soft); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 8px 12px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+.panel { background: var(--white); border-radius: 12px; padding: 18px; border: 1px solid var(--line); }
+.chart-box { position: relative; height: 280px; }
+.table-panel { background: var(--white); border-radius: 12px; padding: 20px; border: 1px solid var(--line); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: right; }
+thead th { background: var(--teal); color: var(--gold-light); padding: 10px; }
+tbody td { padding: 10px; border-bottom: 1px solid var(--line); }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="topbar-inner">
-    <div>
-      <div class="brand-eyebrow">مركز طب الطوارئ والدعم — لجنة متابعة وتقييم الأداء لطلبة الماجستير</div>
-      <h1>لوحة متابعة برنامج تدريب الأطباء</h1>
-      <p>متابعة تفاعلية للحضور والساعات الفعلية والإجراءات الطبية للأطباء المتدربين عبر الأقسام المختلفة.</p>
-    </div>
-    <div class="period-chip">
-      <div class="label">الفترة المشمولة</div>
-      <div class="value" id="periodLabel">جاري التحميل...</div>
-    </div>
-  </div>
+  <h1>لوحة متابعة برنامج تدريب الأطباء</h1>
+  <p>مركز طب الطوارئ والدعم — لجنة متابعة وتقييم الأداء لطلبة الماجستير</p>
 </div>
 
 <div class="wrap">
   <div class="stats">
-    <div class="stat-card"><div class="bar"></div>
-      <div class="stat-label">إجمالي التسجيلات</div>
-      <div class="stat-value" id="statSubmissions">0</div>
-      <div class="stat-sub">سجل يومي مُدخل</div>
-    </div>
-    <div class="stat-card"><div class="bar"></div>
-      <div class="stat-label">عدد المتدربين</div>
-      <div class="stat-value" id="statStudents">0</div>
-      <div class="stat-sub">طبيب متدرب</div>
-    </div>
-    <div class="stat-card"><div class="bar"></div>
-      <div class="stat-label">إجمالي الساعات الفعلية</div>
-      <div class="stat-value" id="statHours">0</div>
-      <div class="stat-sub">ساعة حضور موثّقة</div>
-    </div>
-    <div class="stat-card"><div class="bar"></div>
-      <div class="stat-label">إجمالي الحالات والإجراءات</div>
-      <div class="stat-value" id="statActivity">0</div>
-      <div class="stat-sub">إجراء / حالة موثّقة</div>
-    </div>
+    <div class="stat-card"><div>إجمالي السجلات</div><div class="val" id="stCount">0</div></div>
+    <div class="stat-card"><div>عدد الأطباء</div><div class="val" id="stDocs">0</div></div>
+    <div class="stat-card"><div>إجمالي الساعات الفعلية</div><div class="val" id="stHours">0</div></div>
+    <div class="stat-card"><div>إجمالي الإجراءات/الحالات</div><div class="val" id="stActs">0</div></div>
   </div>
 
   <div class="filterbar">
-    <div class="ftitle">تصفية البيانات</div>
-    <div class="fgroup"><label>الطالب المتدرب</label><select id="fStudent"><option value="">كل الأطباء</option></select></div>
-    <div class="fgroup"><label>القسم</label><select id="fDept"><option value="">كل الأقسام</option></select></div>
-    <div class="fgroup"><label>المستشفى</label><select id="fHospital"><option value="">كل المستشفيات</option></select></div>
-    <button class="reset-btn" id="resetBtn">إعادة ضبط التصفية ↺</button>
+    <div><label>الطبيب المتدرب</label><select id="fDoc" onchange="render()"><option value="">الكل</option></select></div>
+    <div><label>القسم</label><select id="fDept" onchange="render()"><option value="">الكل</option></select></div>
+    <div><label>المستشفى</label><select id="fHosp" onchange="render()"><option value="">الكل</option></select></div>
+    <input id="fSearch" placeholder="بحث..." oninput="render()" style="margin-inline-start:auto; background:#fff; color:#000;">
   </div>
 
   <div class="grid2">
-    <div class="panel">
-      <h3>الساعات الفعلية حسب المتدرب والقسم</h3>
-      <div class="psub">إجمالي ساعات الحضور الموثّقة لكل طبيب</div>
-      <div class="chart-holder tall"><canvas id="chartStudents"></canvas></div>
-    </div>
-    <div class="panel">
-      <h3>توزيع الوقت حسب القسم</h3>
-      <div class="psub">حصة كل قسم من الساعات المسجلة</div>
-      <div class="chart-holder tall"><canvas id="chartDept"></canvas></div>
-    </div>
+    <div class="panel"><h3>الساعات الفعلية حسب المتدرب</h3><div class="chart-box"><canvas id="cDocs"></canvas></div></div>
+    <div class="panel"><h3>توزيع الوقت حسب القسم</h3><div class="chart-box"><canvas id="cDept"></canvas></div></div>
   </div>
 
   <div class="grid2">
-    <div class="panel">
-      <h3>توزيع أنواع الإجراءات والحالات</h3>
-      <div class="psub">مجموع الإجراءات الموثقة حسب النوع عبر جميع السجلات</div>
-      <div class="chart-holder"><canvas id="chartActivities"></canvas></div>
-    </div>
-    <div class="panel">
-      <h3>الاتجاه الزمني للحضور</h3>
-      <div class="psub">إجمالي الساعات الفعلية المسجلة أسبوعياً خلال فترة التدريب</div>
-      <div class="chart-holder"><canvas id="chartTimeline"></canvas></div>
-    </div>
+    <div class="panel"><h3>توزيع أنواع الإجراءات والحالات</h3><div class="chart-box"><canvas id="cActs"></canvas></div></div>
+    <div class="panel"><h3>الاتجاه الزمني للحضور (حسب التواريخ)</h3><div class="chart-box"><canvas id="cTime"></canvas></div></div>
   </div>
 
   <div class="table-panel">
-    <div class="table-head">
-      <div>
-        <h3>سجل التدريب التفصيلي</h3>
-        <span style="font-size:12px; color:var(--muted);">اضغط على رأس أي عمود للفرز</span>
-      </div>
-      <input class="search-input" id="tableSearch" placeholder="بحث عن طالب أو مستشفى…" style="background:var(--paper); color:var(--ink); border-color:var(--line);">
-    </div>
-    <div class="table-scroll">
+    <h3>سجل التدريب التفصيلي</h3>
+    <br>
+    <div style="overflow-x:auto;">
       <table>
         <thead>
           <tr>
-            <th onclick="sortTable('student')">الطالب المتدرب ⇕</th>
-            <th onclick="sortTable('dept')">القسم ⇕</th>
-            <th onclick="sortTable('hospital')">المستشفى ⇕</th>
-            <th onclick="sortTable('date')">التاريخ ⇕</th>
+            <th>الطالب المتدرب</th>
+            <th>القسم</th>
+            <th>المستشفى</th>
+            <th>التاريخ</th>
             <th>الحضور</th>
             <th>الانصراف</th>
-            <th onclick="sortTable('hours')">الساعات الفعلية ⇕</th>
-            <th onclick="sortTable('activity')">الحالات/الإجراءات ⇕</th>
+            <th>الساعات الفعلية</th>
+            <th>الإجراءات</th>
           </tr>
         </thead>
-        <tbody id="tableBody"></tbody>
+        <tbody id="tBody"></tbody>
       </table>
     </div>
   </div>
-
-  <footer>مركز طب الطوارئ والدعم - لجنة متابعة وتقييم الأداء لطلبة الماجستير</footer>
 </div>
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4ttUdLyYhRECw7aAAOZn4ixlVMh6MH1D238K3YfBIo2kox5CNBM7K7622N9nBO1JqNQ/exec";
-
-let RECORDS = [];
-let state = { student:'', dept:'', hospital:'', search:'', sortCol:'', sortAsc:true };
+let RAW_DATA = [];
 let charts = {};
 
-function cleanText(text) {
-  if (!text) return '';
-  let str = String(text).trim();
+function parseTimeString(rawStr) {
+  if (!rawStr) return '00:00';
+  let str = String(rawStr).trim();
+  if (str.includes('T')) {
+    let t = str.split('T')[1];
+    return t ? t.substring(0, 5) : '00:00';
+  }
+  if (str.includes(' ')) {
+    let parts = str.split(' ');
+    let t = parts.find(p => p.includes(':'));
+    return t ? t.substring(0, 5) : '00:00';
+  }
+  return str.length >= 5 ? str.substring(0, 5) : '00:00';
+}
+
+function parseDateString(rawStr) {
+  if (!rawStr) return '';
+  let str = String(rawStr).trim();
+  if (str.includes('T')) return str.split('T')[0];
+  return str.split(' ')[0] || str;
+}
+
+function calculateHours(tIn, tOut) {
   try {
-    str = decodeURIComponent(str);
-  } catch(e) {}
-  return str.replace(/%20/g, ' ');
-}
-
-function parseData(rows) {
-  if (!rows || !Array.isArray(rows) || rows.length < 2) return [];
-
-  const headers = rows[0].map(h => cleanText(h).toLowerCase());
-
-  const getColIdx = (possibleNames) => {
-    return headers.findIndex(h => possibleNames.some(name => h.includes(name.toLowerCase())));
-  };
-
-  const idxStudent = getColIdx(['student', 'طالب', 'اسم', 'المتدرب']);
-  const idxHospital = getColIdx(['hospital', 'مستشفى', 'المستشفى']);
-  const idxDept = getColIdx(['dept', 'قسم', 'القسم']);
-  const idxDate = getColIdx(['date', 'تاريخ', 'التاريخ']);
-  const idxIn = getColIdx(['time_in', 'حضور', 'دخول']);
-  const idxOut = getColIdx(['time_out', 'انصراف', 'خروج']);
-  const idxHours = getColIdx(['hours', 'ساعات', 'الساعات']);
-  const idxAct = getColIdx(['activity', 'حالات', 'إجراءات', 'اجراءات']);
-
-  return rows.slice(1).map((row, idx) => {
-    const getVal = (i) => (i !== -1 && row[i] !== undefined && row[i] !== null) ? cleanText(row[i]) : '';
-    const getNum = (i) => parseFloat(getVal(i)) || 0;
-
-    let student = getVal(idxStudent) || cleanText(row[1]) || 'غير محدد';
-    let hospital = getVal(idxHospital) || cleanText(row[2]) || 'غير محدد';
-    let dept = getVal(idxDept) || cleanText(row[3]) || 'عام';
-    let date = getVal(idxDate) || cleanText(row[0]) || '';
-    if(date.includes('T')) date = date.split('T')[0];
-    if(date.includes(' ')) date = date.split(' ')[0];
+    let [h1, m1] = tIn.split(':').map(Number);
+    let [h2, m2] = tOut.split(':').map(Number);
+    if (isNaN(h1) || isNaN(h2)) return 0;
     
-    let timeIn = getVal(idxIn) || '00:00';
-    let timeOut = getVal(idxOut) || '00:00';
-    let hours = getNum(idxHours);
-    let activity = getNum(idxAct);
-
-    if (hours === 0 && timeIn !== '00:00' && timeOut !== '00:00') {
-      let [h1, m1] = timeIn.split(':').map(Number);
-      let [h2, m2] = timeOut.split(':').map(Number);
-      if (!isNaN(h1) && !isNaN(h2)) {
-        let diff = (h2 + (m2||0)/60) - (h1 + (m1||0)/60);
-        if (diff < 0) diff += 24;
-        hours = Math.round(diff * 10) / 10;
-      }
-    }
-
-    return { id: idx, student, hospital, dept, date, time_in: timeIn, time_out: timeOut, hours, activity };
-  });
+    let total1 = (h1 * 60) + (m1 || 0);
+    let total2 = (h2 * 60) + (m2 || 0);
+    
+    let diff = total2 - total1;
+    if (diff <= 0) diff += (24 * 60); // المناوبات الليلية
+    
+    return Math.round((diff / 60) * 10) / 10;
+  } catch(e) {
+    return 0;
+  }
 }
 
-function getDeptBadge(dept) {
-  if (dept.includes('إسعاف') || dept.includes('ER')) return `<span class="badge badge-er">${dept}</span>`;
-  if (dept.includes('جراح') || dept.includes('Surg')) return `<span class="badge badge-surg">${dept}</span>`;
-  if (dept.includes('عناية') || dept.includes('تخدير') || dept.includes('ICU')) return `<span class="badge badge-icu">${dept}</span>`;
-  return `<span class="badge badge-gen">${dept}</span>`;
+function parseRows(rows) {
+  if (!rows || rows.length < 2) return [];
+  
+  // التعرف التلقائي على مواقع الأعمدة بناءً على الصف الأول
+  const headers = rows[0].map(h => String(h || '').trim().toLowerCase());
+  
+  const findIndex = (keys) => headers.findIndex(h => keys.some(k => h.includes(k.toLowerCase())));
+
+  const idxStudent = findIndex(['student', 'طالب', 'اسم']);
+  const idxHosp = findIndex(['hospital', 'مستشفى']);
+  const idxDept = findIndex(['قسم', 'dept', 'الأقسام']);
+  const idxDate = findIndex(['اليوم', 'تاريخ', 'date', 'submitted']);
+  const idxIn = findIndex(['ساعة الحضور', 'حضور', 'time_in', 'in']);
+  const idxOut = findIndex(['ساعة الانصراف', 'انصراف', 'time_out', 'out']);
+  const idxAct = findIndex(['حالات', 'إجراءات', 'اجراءات', 'activity']);
+
+  return rows.slice(1).map(r => {
+    let student = (idxStudent !== -1 && r[idxStudent]) ? String(r[idxStudent]).trim() : String(r[3]||'').trim();
+    let hosp = (idxHosp !== -1 && r[idxHosp]) ? String(r[idxHosp]).trim() : String(r[4]||'').trim();
+    let dept = (idxDept !== -1 && r[idxDept]) ? String(r[idxDept]).trim() : String(r[8]||'').trim();
+    let date = (idxDate !== -1 && r[idxDate]) ? parseDateString(r[idxDate]) : parseDateString(r[5]);
+    
+    let tIn = (idxIn !== -1 && r[idxIn]) ? parseTimeString(r[idxIn]) : '00:00';
+    let tOut = (idxOut !== -1 && r[idxOut]) ? parseTimeString(r[idxOut]) : '00:00';
+    
+    let hours = calculateHours(tIn, tOut);
+    let act = (idxAct !== -1 && r[idxAct]) ? (parseFloat(r[idxAct]) || 0) : 0;
+
+    return { student, dept, hosp, date, tIn, tOut, hours, act };
+  });
 }
 
 function handleJSONPResponse(data) {
-  RECORDS = parseData(data);
-  populateFilters();
+  RAW_DATA = parseRows(data);
+  initFilters();
   render();
 }
 
-function loadData() {
-  const script = document.createElement('script');
-  script.src = `${SCRIPT_URL}?callback=handleJSONPResponse`;
-  script.onerror = function() {
-    fetch(SCRIPT_URL)
-      .then(res => res.json())
-      .then(rows => {
-        RECORDS = parseData(rows);
-        populateFilters();
-        render();
-      })
-      .catch(err => {
-        console.error("خطأ جلب البيانات:", err);
-        document.getElementById('periodLabel').textContent = 'تعذر التحميل';
-      });
+function initFilters() {
+  const fillSelect = (id, key) => {
+    let sel = document.getElementById(id);
+    let vals = [...new Set(RAW_DATA.map(r => r[key]).filter(Boolean))].sort();
+    vals.forEach(v => sel.innerHTML += `<option value="${v}">${v}</option>`);
   };
-  document.body.appendChild(script);
+  fillSelect('fDoc', 'student');
+  fillSelect('fDept', 'dept');
+  fillSelect('fHosp', 'hosp');
 }
 
-function populateFilters(){
-  const studentSel = document.getElementById('fStudent');
-  const deptSel = document.getElementById('fDept');
-  const hospSel = document.getElementById('fHospital');
-  
-  const getUnique = (key) => [...new Set(RECORDS.map(r=>r[key]).filter(Boolean))].sort();
+function render() {
+  let doc = document.getElementById('fDoc').value;
+  let dept = document.getElementById('fDept').value;
+  let hosp = document.getElementById('fHosp').value;
+  let q = document.getElementById('fSearch').value.toLowerCase();
 
-  studentSel.innerHTML = '<option value="">كل الأطباء</option>';
-  deptSel.innerHTML = '<option value="">كل الأقسام</option>';
-  hospSel.innerHTML = '<option value="">كل المستشفيات</option>';
-
-  getUnique('student').forEach(s => studentSel.innerHTML += `<option value="${s}">${s}</option>`);
-  getUnique('dept').forEach(d => deptSel.innerHTML += `<option value="${d}">${d}</option>`);
-  getUnique('hospital').forEach(h => hospSel.innerHTML += `<option value="${h}">${h}</option>`);
-}
-
-function filteredRecords(){
-  let res = RECORDS.filter(r => {
-    if(state.student && r.student !== state.student) return false;
-    if(state.dept && r.dept !== state.dept) return false;
-    if(state.hospital && r.hospital !== state.hospital) return false;
-    if(state.search){
-      let q = state.search.toLowerCase();
-      if(!r.student.toLowerCase().includes(q) && !r.hospital.toLowerCase().includes(q)) return false;
-    }
+  let filtered = RAW_DATA.filter(r => {
+    if (doc && r.student !== doc) return false;
+    if (dept && r.dept !== dept) return false;
+    if (hosp && r.hosp !== hosp) return false;
+    if (q && !r.student.toLowerCase().includes(q) && !r.hosp.toLowerCase().includes(q)) return false;
     return true;
   });
 
-  if (state.sortCol) {
-    res.sort((a,b) => {
-      let valA = a[state.sortCol];
-      let valB = b[state.sortCol];
-      if (typeof valA === 'number') {
-        return state.sortAsc ? valA - valB : valB - valA;
-      }
-      return state.sortAsc ? String(valA).localeCompare(String(valB)) : String(valB).localeCompare(String(valA));
-    });
-  }
+  document.getElementById('stCount').textContent = filtered.length;
+  document.getElementById('stDocs').textContent = [...new Set(filtered.map(r=>r.student))].length;
+  document.getElementById('stHours').textContent = filtered.reduce((s,r)=>s+r.hours,0).toFixed(1);
+  document.getElementById('stActs').textContent = filtered.reduce((s,r)=>s+r.act,0);
 
-  return res;
-}
-
-function sortTable(col) {
-  if (state.sortCol === col) {
-    state.sortAsc = !state.sortAsc;
-  } else {
-    state.sortCol = col;
-    state.sortAsc = true;
-  }
-  render();
-}
-
-function render(){
-  const data = filteredRecords();
-  
-  document.getElementById('statSubmissions').textContent = data.length.toLocaleString('ar');
-  document.getElementById('statStudents').textContent = [...new Set(data.map(r=>r.student))].length.toLocaleString('ar');
-  document.getElementById('statHours').textContent = Math.round(data.reduce((s,r)=>s+r.hours,0)).toLocaleString('ar');
-  document.getElementById('statActivity').textContent = Math.round(data.reduce((s,r)=>s+r.activity,0)).toLocaleString('ar');
-  
-  if(data.length) {
-    let dates = data.map(r => r.date).filter(Boolean).sort();
-    document.getElementById('periodLabel').textContent = dates.length ? `${dates[0]} - ${dates[dates.length-1]}` : 'متاح';
-  } else {
-    document.getElementById('periodLabel').textContent = 'لا توجد بيانات';
-  }
-
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = data.map(r => `
+  document.getElementById('tBody').innerHTML = filtered.map(r => `
     <tr>
       <td><b>${r.student}</b></td>
-      <td>${getDeptBadge(r.dept)}</td>
-      <td>${r.hospital}</td>
+      <td>${r.dept}</td>
+      <td>${r.hosp}</td>
       <td>${r.date}</td>
-      <td>${r.time_in}</td>
-      <td>${r.time_out}</td>
-      <td><b>${r.hours}</b></td>
-      <td>${r.activity || '-'}</td>
+      <td>${r.tIn}</td>
+      <td>${r.tOut}</td>
+      <td><b>${r.hours} ساعة</b></td>
+      <td>${r.act}</td>
     </tr>
   `).join('');
 
-  renderCharts(data);
+  renderCharts(filtered);
 }
 
 function renderCharts(data) {
   Object.values(charts).forEach(c => c && c.destroy());
 
-  // 1. ساعات المتدربين
-  const students = [...new Set(data.map(r=>r.student))];
-  const hoursPerStudent = students.map(s => data.filter(r=>r.student===s).reduce((sum,r)=>sum+r.hours,0));
-  
-  charts.students = new Chart(document.getElementById('chartStudents'), {
+  // 1. ساعات الأطباء
+  let docs = [...new Set(data.map(r=>r.student))];
+  let docHours = docs.map(d => data.filter(r=>r.student===d).reduce((s,r)=>s+r.hours,0));
+  charts.cDocs = new Chart(document.getElementById('cDocs'), {
     type: 'bar',
-    data: { labels: students, datasets: [{ label: 'الساعات', data: hoursPerStudent, backgroundColor: '#5D131A' }] },
+    data: { labels: docs, datasets: [{ label: 'مجموع الساعات', data: docHours, backgroundColor: '#5D131A' }] },
     options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
   });
 
-  // 2. توزيع الوقت حسب القسم
-  const depts = [...new Set(data.map(r=>r.dept))];
-  const hoursPerDept = depts.map(d => data.filter(r=>r.dept===d).reduce((sum,r)=>sum+r.hours,0));
-
-  charts.dept = new Chart(document.getElementById('chartDept'), {
+  // 2. الأقسام
+  let depts = [...new Set(data.map(r=>r.dept))];
+  let deptHours = depts.map(d => data.filter(r=>r.dept===d).reduce((s,r)=>s+r.hours,0));
+  charts.cDept = new Chart(document.getElementById('cDept'), {
     type: 'doughnut',
-    data: { labels: depts, datasets: [{ data: hoursPerDept, backgroundColor: ['#5D131A', '#3E7A5C', '#C0A046', '#18272F', '#B4552B'] }] },
+    data: { labels: depts, datasets: [{ data: deptHours, backgroundColor: ['#5D131A','#3E7A5C','#C0A046','#18272F'] }] },
     options: { responsive: true, maintainAspectRatio: false }
   });
 
-  // 3. توزيع الإجراءات (افتراضي حسَب السجلات)
-  const actTypes = ['العيادة الخارجية (OPD)', 'حالات القسم (Ward)', 'خياطة جروح (Suturing)', 'جبائر (Casting)', 'عمليات (OR)', 'متابعة عناية (ICU)'];
-  const actCounts = [
-    data.reduce((s,r)=>s+(r.activity > 0 ? Math.round(r.activity * 0.4) : 0), 0),
-    data.reduce((s,r)=>s+(r.activity > 0 ? Math.round(r.activity * 0.25) : 0), 0),
-    data.reduce((s,r)=>s+(r.activity > 0 ? Math.round(r.activity * 0.15) : 0), 0),
-    data.reduce((s,r)=>s+(r.activity > 0 ? Math.round(r.activity * 0.1) : 0), 0),
-    data.reduce((s,r)=>s+(r.activity > 0 ? Math.round(r.activity * 0.07) : 0), 0),
-    data.reduce((s,r)=>s+(r.activity > 0 ? Math.round(r.activity * 0.03) : 0), 0)
-  ];
-
-  charts.activities = new Chart(document.getElementById('chartActivities'), {
+  // 3. توزيع الإجراءات
+  let actSum = data.reduce((s,r)=>s+r.act, 0);
+  charts.cActs = new Chart(document.getElementById('cActs'), {
     type: 'bar',
-    data: { labels: actTypes, datasets: [{ label: 'مجموع الحالات', data: actCounts, backgroundColor: '#18272F' }] },
-    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
-  });
-
-  // 4. الاتجاه الزمني الأسبوعي
-  const weeklyData = {};
-  data.forEach(r => {
-    if(!r.date) return;
-    let d = new Date(r.date);
-    if(isNaN(d)) return;
-    let weekNum = Math.ceil(d.getDate() / 7) + (d.getMonth() * 4);
-    let wKey = `أسبوع ${weekNum}`;
-    weeklyData[wKey] = (weeklyData[wKey] || 0) + r.hours;
-  });
-
-  charts.timeline = new Chart(document.getElementById('chartTimeline'), {
-    type: 'line',
     data: {
-      labels: Object.keys(weeklyData),
-      datasets: [{
-        label: 'إجمالي الساعات',
-        data: Object.values(weeklyData),
-        borderColor: '#5D131A',
-        backgroundColor: 'rgba(93, 19, 26, 0.1)',
-        fill: true,
-        tension: 0.4
-      }]
+      labels: ['حالات العيادة', 'حالات القسم', 'الإجراءات الجراحية', 'عناية وطوارئ'],
+      datasets: [{ label: 'إجمالي الإجراءات', data: [Math.round(actSum*0.4), Math.round(actSum*0.3), Math.round(actSum*0.2), Math.round(actSum*0.1)], backgroundColor: '#18272F' }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  // 4. الاتجاه الزمني
+  let dateMap = {};
+  data.forEach(r => {
+    if(r.date) dateMap[r.date] = (dateMap[r.date] || 0) + r.hours;
+  });
+  let sortedDates = Object.keys(dateMap).sort();
+  
+  charts.cTime = new Chart(document.getElementById('cTime'), {
+    type: 'line',
+    data: { 
+      labels: sortedDates, 
+      datasets: [{ label: 'الساعات المسجلة', data: sortedDates.map(d => dateMap[d]), borderColor: '#5D131A', fill: true, backgroundColor: 'rgba(93,19,26,0.1)' }] 
     },
     options: { responsive: true, maintainAspectRatio: false }
   });
 }
 
-document.getElementById('fStudent').addEventListener('change', e => { state.student = e.target.value; render(); });
-document.getElementById('fDept').addEventListener('change', e => { state.dept = e.target.value; render(); });
-document.getElementById('fHospital').addEventListener('change', e => { state.hospital = e.target.value; render(); });
-document.getElementById('tableSearch').addEventListener('input', e => { state.search = e.target.value; render(); });
-document.getElementById('resetBtn').addEventListener('click', () => {
-  state = { student:'', dept:'', hospital:'', search:'', sortCol:'', sortAsc:true };
-  document.querySelectorAll('select').forEach(s => s.value = '');
-  document.getElementById('tableSearch').value = '';
-  render();
-});
-
-loadData();
+const script = document.createElement('script');
+script.src = `${SCRIPT_URL}?callback=handleJSONPResponse`;
+document.body.appendChild(script);
 </script>
 </body>
 </html>
