@@ -179,7 +179,6 @@ select:focus, .search-input:focus{ border-color:var(--gold); }
 
 /* ===== Panels ===== */
 .grid2{ display:grid; grid-template-columns:1.3fr 1fr; gap:18px; margin-bottom:18px; }
-.grid3{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
 .panel{
   background:var(--white);
   border:1px solid var(--line);
@@ -196,7 +195,6 @@ select:focus, .search-input:focus{ border-color:var(--gold); }
 .chart-holder{ position:relative; height:290px; }
 .chart-holder.tall{ height:340px; }
 
-/* legend note */
 .note{
   font-size:11.5px;
   color:var(--warn);
@@ -229,19 +227,6 @@ tbody td{ padding:10px 12px; border-bottom:1px solid var(--line); white-space:no
 tbody tr:hover{ background:#FAF6EC; }
 tbody tr:nth-child(even){ background:#FCFBF9; }
 tbody tr:nth-child(even):hover{ background:#FAF6EC; }
-.badge{
-  display:inline-block;
-  font-size:11px;
-  font-weight:600;
-  padding:3px 9px;
-  border-radius:20px;
-}
-.badge.surg{ background:#EFE1E2; color:var(--maroon); }
-.badge.anes{ background:#DCE7E3; color:var(--good); }
-.badge.er{ background:#F3E8D2; color:#8A6A20; }
-.flag{ color:var(--warn); font-weight:700; cursor:help; }
-.hours-cell{ font-weight:700; font-family:'Cairo',sans-serif; }
-.empty-row td{ text-align:center; color:var(--muted); padding:26px; }
 
 footer{
   text-align:center;
@@ -252,7 +237,7 @@ footer{
 
 @media (max-width:1080px){
   .stats{ grid-template-columns:repeat(2,1fr); }
-  .grid2, .grid3{ grid-template-columns:1fr; }
+  .grid2{ grid-template-columns:1fr; }
 }
 @media (max-width:640px){
   .stats{ grid-template-columns:1fr; }
@@ -341,7 +326,7 @@ footer{
       <h3>توزيع أنواع الإجراءات والحالات</h3>
       <div class="psub">مجموع الإجراءات الموثّقة حسب النوع عبر جميع السجلات</div>
       <div class="chart-holder"><canvas id="chartProcedures"></canvas></div>
-      <div class="note">⚠ بعض السجلات تحتوي على ساعات حضور غير منطقية (تجاوز 30 ساعة متواصلة) بسبب خطأ في إدخال وقت الانصراف، وقد استُثنيت من إجمالي الساعات مع الإبقاء عليها في الجدول أدناه للمراجعة.</div>
+      <div class="note">⚠ يتم التحديث تلقائياً بشكل حي مباشرة عند إدخال أو تعديل أي سجل في نموذج جوجل.</div>
     </div>
   </div>
 
@@ -349,7 +334,7 @@ footer{
     <div class="table-head">
       <div>
         <h3 style="font-size:15.5px;font-weight:700;color:var(--teal);">سجل التدريب التفصيلي</h3>
-        <div class="psub" style="margin-bottom:0;">اضغط على رأس أي عمود للفرز</div>
+        <div class="psub" style="margin-bottom:0;">عرض البيانات المباشرة المفتوحة من Google Sheets</div>
       </div>
       <input class="search-input" id="tableSearch" placeholder="بحث عن طالب أو مستشفى…" style="background:var(--paper); color:var(--ink); border-color:var(--line);">
     </div>
@@ -357,14 +342,14 @@ footer{
       <table id="dataTable">
         <thead>
           <tr>
-            <th data-key="student">الطالب المتدرب</th>
-            <th data-key="dept">القسم</th>
-            <th data-key="hospital">المستشفى</th>
-            <th data-key="date">التاريخ</th>
-            <th data-key="time_in">الحضور</th>
-            <th data-key="time_out">الانصراف</th>
-            <th data-key="hours">الساعات الفعلية</th>
-            <th data-key="activity">الحالات/الإجراءات</th>
+            <th>الطالب المتدرب</th>
+            <th>القسم</th>
+            <th>المستشفى</th>
+            <th>التاريخ</th>
+            <th>الحضور</th>
+            <th>الانصراف</th>
+            <th>الساعات الفعلية</th>
+            <th>الحالات/الإجراءات</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -372,249 +357,90 @@ footer{
     </div>
   </div>
 
-  <footer>لوحة متابعة تفاعلية مُولّدة من بيانات نموذج التدريب اليومي · مركز طب الطوارئ والدعم — مكتب شؤون المكاتب</footer>
+  <footer>لوحة متابعة تفاعلية حية مُولّدة من جوجل شيت · مركز طب الطوارئ والدعم — مكتب شؤون المكاتب</footer>
 </div>
 
 <script>
-const RECORDS = [{"id":"Z9NbDpz","student":"عمر صالح عمر اغليو","hospital":"غير محدد","dept":"الجراحة","date":"2026/05/24","time_in":"8:01:00","time_out":"23:59:00","hours":15.97,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":1.0,"or2":0,"or3":3.0,"opd":0,"ward":6.0,"icu_hrs":0,"icu_cases":0,"activity":10.0},{"id":"X5DbpQz","student":"محمد سعد إبراهيم الغزاوي","hospital":"غير محدد","dept":"التخدير والعناية المركزة","date":"2026/05/24","time_in":"8:00:00","time_out":"20:00:00","hours":12.0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":24.0,"icu_cases":3.0,"activity":3.0},{"id":"Ger508Z","student":"سندس بشير امحمد دردور","hospital":"غير محدد","dept":"الإسعاف","date":"2026/05/30","time_in":"9:00:00","time_out":"21:00:00","hours":12.0,"flag":false,"er":1.0,"intub":0,"cline":0,"ctube":1.0,"suture":3.0,"cast":2.0,"triage":18.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":7.0},{"id":"2j4RYMA","student":"محمود","hospital":"غير محدد","dept":"الجراحة","date":"2026/05/31","time_in":"10:00:00","time_out":"14:00:00","hours":4.0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":4.0,"icu_hrs":0,"icu_cases":0,"activity":4.0},{"id":"rDlReLL","student":"عمر صالح عمر اغليو","hospital":"غير محدد","dept":"الجراحة","date":"2026/07/31","time_in":"8:01:00","time_out":"23:59:00","hours":15.97,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":2.0,"or2":0,"or3":2.0,"opd":0,"ward":7.0,"icu_hrs":0,"icu_cases":0,"activity":11.0},{"id":"EqPjX2q","student":"ربيع","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/02","time_in":"9:00:00","time_out":"1:00:00","hours":0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":4.0,"ward":2.0,"icu_hrs":0,"icu_cases":0,"activity":6.0},{"id":"laAaKl6","student":"عمر صالح عمر اغليو","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/03","time_in":"9:01:00","time_out":"1:10:00","hours":16.15,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":15.0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":15.0},{"id":"jeMBrZa","student":"ربيع","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/04","time_in":"9:00:00","time_out":"21:00:00","hours":0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0.0,"or2":0.0,"or3":0.0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":0.0},{"id":"J1RJ77r","student":"علي إبراهيم اسويسي","hospital":"غير محدد","dept":"الجراحة","date":"2026/05/06","time_in":"8:00:00","time_out":"21:00:00","hours":13.0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":2.0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":2.0},{"id":"7XDpbaL","student":"سندس بشير امحمد دردور","hospital":"غير محدد","dept":"الإسعاف","date":"2026/06/06","time_in":"8:29:00","time_out":"20:03:00","hours":11.57,"flag":false,"er":2.0,"intub":0.0,"cline":0.0,"ctube":0.0,"suture":2.0,"cast":2.0,"triage":17.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":6.0},{"id":"e5AygBo","student":"عمر صالح عمر اغليو","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/07","time_in":"8:02:00","time_out":"23:59:00","hours":15.95,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":4.0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":4.0},{"id":"ArJag2N","student":"محمد سعد إبراهيم الغزاوي","hospital":"غير محدد","dept":"التخدير والعناية المركزة","date":"2026/06/07","time_in":"9:00:00","time_out":"18:30:00","hours":9.5,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":12.0,"icu_cases":5.0,"activity":5.0},{"id":"o9BpzRe","student":"عمر صالح عمر اغليو","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/08","time_in":"8:30:00","time_out":"12:01:00","hours":3.52,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":9.0,"icu_hrs":0,"icu_cases":0,"activity":9.0},{"id":"8NkWylO","student":"مفتاح محمد ناصر مفتاح المهدوي","hospital":"غير محدد","dept":"الإسعاف","date":"2026/06/07","time_in":"8:00:00","time_out":"20:00:00","hours":12.0,"flag":false,"er":0.0,"intub":0.0,"cline":0.0,"ctube":0.0,"suture":4.0,"cast":2.0,"triage":67.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":6.0},{"id":"ArJ1xzo","student":"غير محدد","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/09","time_in":"8:30:00","time_out":"21:30:00","hours":13.0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":3.0,"or2":1.0,"or3":1.0,"opd":25.0,"ward":8.0,"icu_hrs":0,"icu_cases":0,"activity":38.0},{"id":"M1OoQ2k","student":"عمر صالح عمر اغليو","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/10","time_in":"8:30:00","time_out":"0:30:00","hours":16.0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":25.0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":25.0},{"id":"LD0zDKz","student":"محمود","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/10","time_in":"9:30:00","time_out":"14:00:00","hours":0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":4.0,"icu_hrs":0,"icu_cases":0,"activity":4.0},{"id":"4aj8VdO","student":"مفتاح محمد ناصر مفتاح المهدوي","hospital":"غير محدد","dept":"الإسعاف","date":"2026/06/11","time_in":"8:10:00","time_out":"20:00:00","hours":11.83,"flag":false,"er":5.0,"intub":0.0,"cline":0.0,"ctube":0.0,"suture":5.0,"cast":8.0,"triage":85.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":18.0},{"id":"e5EK05k","student":"مفتاح محمد ناصر مفتاح المهدوي","hospital":"غير محدد","dept":"الإسعاف","date":"2026/06/13","time_in":"20:00:00","time_out":"20:00:00","hours":0.0,"flag":false,"er":1.0,"intub":0.0,"cline":0.0,"ctube":0.0,"suture":4.0,"cast":2.0,"triage":80.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":7.0},{"id":"YjdkYev","student":"سندس بشير امحمد دردور","hospital":"مستشفى الحوادث أبو سليم","dept":"الإسعاف","date":"2026/06/12","time_in":"11:14:00","time_out":"19:37:00","hours":8.38,"flag":false,"er":1.0,"intub":1.0,"cline":0.0,"ctube":0.0,"suture":5.0,"cast":7.0,"triage":6.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":14.0},{"id":"LD0kJVO","student":"سندس بشير امحمد دردور","hospital":"مستشفى الحوادث أبو سليم","dept":"الإسعاف","date":"2026/06/13","time_in":"9:37:00","time_out":"20:32:00","hours":10.92,"flag":false,"er":1.0,"intub":1.0,"cline":0.0,"ctube":0.0,"suture":2.0,"cast":4.0,"triage":7.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":8.0},{"id":"laRgN76","student":"عمر صالح عمر اغليو","hospital":"مركز بنغازي الطبي","dept":"الجراحة","date":"2026/06/14","time_in":"8:07:00","time_out":"23:59:00","hours":15.87,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":4.0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":4.0},{"id":"2jrVMOV","student":"عمر صالح عمر اغليو","hospital":"مركز بنغازي الطبي","dept":"الجراحة","date":"2026/06/15","time_in":"8:20:00","time_out":"23:45:00","hours":15.42,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":9.0,"icu_hrs":0,"icu_cases":0,"activity":9.0},{"id":"yXDLDxB","student":"غير محدد","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/16","time_in":"10:00:00","time_out":"21:00:00","hours":11.0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":1.0,"or2":1.0,"or3":1.0,"opd":25.0,"ward":8.0,"icu_hrs":0,"icu_cases":0,"activity":36.0},{"id":"aO06WWB","student":"مفتاح محمد ناصر مفتاح المهدوي","hospital":"مركز بنغازي الطبي","dept":"الإسعاف","date":"2026/06/18","time_in":"8:00:00","time_out":"20:00:00","hours":12.0,"flag":false,"er":1.0,"intub":0.0,"cline":0.0,"ctube":0.0,"suture":4.0,"cast":2.0,"triage":89.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":7.0},{"id":"xV2yvd5","student":"علي إبراهيم اسويسي","hospital":"مركز سبها الطبي","dept":"الجراحة","date":"2026/06/20","time_in":"8:00:00","time_out":"20:00:00","hours":12.0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":0},{"id":"kb5RPEd","student":"مفتاح محمد ناصر مفتاح المهدوي","hospital":"مركز بنغازي الطبي","dept":"الإسعاف","date":"2026/06/20","time_in":"8:00:00","time_out":"20:00:00","hours":12.0,"flag":false,"er":2.0,"intub":0.0,"cline":0.0,"ctube":0.0,"suture":4.0,"cast":9.0,"triage":130.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":15.0},{"id":"EqLZv2q","student":"ربيع","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/18","time_in":"9:00:00","time_out":"21:00:00","hours":0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0.0,"or2":0,"or3":0.0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":0.0},{"id":"9NOMKWG","student":"محمد سعد إبراهيم الغزاوي","hospital":"مستشفى الحوادث أبو سليم","dept":"التخدير والعناية المركزة","date":"2026/06/21","time_in":"9:00:00","time_out":"19:15:00","hours":10.25,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":20.0,"icu_cases":4.0,"activity":4.0},{"id":"peG65bE","student":"ربيع","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/23","time_in":"9:00:00","time_out":"0:00:00","hours":0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":3.0,"ward":0.0,"icu_hrs":0,"icu_cases":0,"activity":3.0},{"id":"WJPXzye","student":"سندس بشير امحمد دردور","hospital":"مستشفى الحوادث أبو سليم","dept":"الإسعاف","date":"2026/06/20","time_in":"9:52:00","time_out":"20:57:00","hours":11.08,"flag":false,"er":0.0,"intub":0.0,"cline":0.0,"ctube":0.0,"suture":2.0,"cast":3.0,"triage":20.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":5.0},{"id":"PRlxD1V","student":"عمر صالح عمر اغليو","hospital":"مركز بنغازي الطبي","dept":"الجراحة","date":"2026/06/24","time_in":"8:30:00","time_out":"0:15:00","hours":15.75,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":25.0,"ward":3.0,"icu_hrs":0,"icu_cases":0,"activity":28.0},{"id":"aO0Lo72","student":"غير محدد","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/23","time_in":"10:30:00","time_out":"0:30:00","hours":14.0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":1.0,"or2":1.0,"or3":1.0,"opd":25.0,"ward":10.0,"icu_hrs":0,"icu_cases":0,"activity":38.0},{"id":"Yjr8Jd0","student":"أسعد","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/24","time_in":"10:09:00","time_out":"20:31:00","hours":0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":5.0,"ward":2.0,"icu_hrs":0,"icu_cases":0,"activity":7.0},{"id":"4aL596o","student":"أسعد","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/18","time_in":"10:05:00","time_out":"21:07:00","hours":0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":6.0,"ward":2.0,"icu_hrs":0,"icu_cases":0,"activity":8.0},{"id":"NqLkdal","student":"أسعد","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/11","time_in":"9:36:00","time_out":"20:31:00","hours":0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":6.0,"ward":1.0,"icu_hrs":0,"icu_cases":0,"activity":7.0},{"id":"RWRpjqQ","student":"أسعد","hospital":"غير محدد","dept":"الجراحة","date":"2026/06/04","time_in":"9:23:00","time_out":"19:05:00","hours":0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":8.0,"ward":0.0,"icu_hrs":0,"icu_cases":0,"activity":8.0},{"id":"5XvzPPd","student":"طه","hospital":"غير محدد","dept":"الإسعاف","date":"2026/06/01","time_in":"9:08:00","time_out":"7:08:00","hours":22.0,"flag":false,"er":0.0,"intub":0.0,"cline":0.0,"ctube":0.0,"suture":3.0,"cast":0,"triage":2.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":3.0},{"id":"zEJq5aE","student":"طه","hospital":"غير محدد","dept":"الإسعاف","date":"2026/06/08","time_in":"9:06:00","time_out":"8:10:00","hours":23.07,"flag":false,"er":1.0,"intub":0,"cline":0,"ctube":2.0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":3.0},{"id":"9NvWKXE","student":"طه","hospital":"غير محدد","dept":"الإسعاف","date":"2026/06/15","time_in":"10:07:00","time_out":"8:25:00","hours":22.3,"flag":false,"er":1.0,"intub":0.0,"cline":0.0,"ctube":1.0,"suture":3.0,"cast":2.0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":7.0},{"id":"e526Xek","student":"طه","hospital":"غير محدد","dept":"الإسعاف","date":"2026/06/22","time_in":"8:19:00","time_out":"8:42:00","hours":0.38,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":3.0,"cast":0,"triage":8.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":3.0},{"id":"LDMJoXj","student":"مفتاح محمد ناصر مفتاح المهدوي","hospital":"مركز بنغازي الطبي","dept":"الإسعاف","date":"2026/07/09","time_in":"20:00:00","time_out":"8:00:00","hours":12.0,"flag":false,"er":1.0,"intub":0.0,"cline":0.0,"ctube":0.0,"suture":2.0,"cast":0.0,"triage":73.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":3.0},{"id":"db2o2ZA","student":"عمر صالح عمر اغليو","hospital":"مركز بنغازي الطبي","dept":"الجراحة","date":"2026/07/12","time_in":"8:30:00","time_out":"0:59:00","hours":16.48,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":1.0,"or2":0,"or3":4.0,"opd":0,"ward":9.0,"icu_hrs":0,"icu_cases":0,"activity":14.0},{"id":"Geoeqoz","student":"عمر صالح عمر اغليو","hospital":"مركز بنغازي الطبي","dept":"الجراحة","date":"2026/07/15","time_in":"9:01:00","time_out":"13:15:00","hours":4.23,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":25.0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":25.0},{"id":"QoxAXZY","student":"غير محدد","hospital":"غير محدد","dept":"الجراحة","date":"2026/07/16","time_in":"10:00:00","time_out":"22:00:00","hours":12.0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0.0,"or2":0,"or3":0,"opd":8.0,"ward":0.0,"icu_hrs":0,"icu_cases":0,"activity":8.0},{"id":"xV024oG","student":"مفتاح محمد ناصر مفتاح المهدوي","hospital":"غير محدد","dept":"الإسعاف","date":"2026/07/16","time_in":"20:00:00","time_out":"8:00:00","hours":12.0,"flag":false,"er":1.0,"intub":0.0,"cline":0.0,"ctube":0.0,"suture":5.0,"cast":3.0,"triage":89.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":9.0},{"id":"LDEvGeG","student":"مفتاح محمد ناصر مفتاح المهدوي","hospital":"غير محدد","dept":"الإسعاف","date":"2026/07/17","time_in":"20:00:00","time_out":"8:00:00","hours":12.0,"flag":false,"er":0.0,"intub":0.0,"cline":0.0,"ctube":0.0,"suture":4.0,"cast":3.0,"triage":92.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":7.0},{"id":"LDEVW9G","student":"محمود محمد الطاهر بن عياد","hospital":"مستشفى الحوادث أبو سليم","dept":"الجراحة","date":"2026/07/19","time_in":"9:30:00","time_out":"6:30:00","hours":0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":0},{"id":"o90QlDO","student":"عمر صالح عمر اغليو","hospital":"مركز بنغازي الطبي","dept":"الجراحة","date":"2026/07/19","time_in":"8:30:00","time_out":"0:59:00","hours":16.48,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":1.0,"or2":0,"or3":3.0,"opd":0,"ward":8.0,"icu_hrs":0,"icu_cases":0,"activity":12.0},{"id":"Geo4Lvj","student":"ربيع","hospital":"غير محدد","dept":"التخدير والعناية المركزة","date":"2026/07/16","time_in":"9:01:00","time_out":"8:09:00","hours":288.0,"flag":true,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0.0,"icu_cases":2.0,"activity":2.0},{"id":"zE0o8xE","student":"سندس بشير امحمد دردور","hospital":"مستشفى الحوادث أبو سليم","dept":"الجراحة","date":"2026/07/20","time_in":"9:36:00","time_out":"12:22:00","hours":0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0.0,"or2":0,"or3":0,"opd":28.0,"ward":2.0,"icu_hrs":0,"icu_cases":0,"activity":30.0},{"id":"gbQ16qK","student":"سندس بشير امحمد دردور","hospital":"مستشفى الحوادث أبو سليم","dept":"الجراحة","date":"2026/07/14","time_in":"8:41:00","time_out":"7:28:00","hours":0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0.0,"or2":0.0,"or3":0,"opd":0.0,"ward":0.0,"icu_hrs":0,"icu_cases":0,"activity":0.0},{"id":"LDELY6z","student":"محمود محمد الطاهر بن عياد","hospital":"مستشفى الحوادث أبو سليم","dept":"الجراحة","date":"2026/07/21","time_in":"9:00:00","time_out":"12:00:00","hours":3.0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":30.0,"ward":4.0,"icu_hrs":0,"icu_cases":0,"activity":34.0},{"id":"e59LRRl","student":"مفتاح محمد ناصر مفتاح المهدوي","hospital":"غير محدد","dept":"الإسعاف","date":"2026/07/23","time_in":"20:00:00","time_out":"8:00:00","hours":12.0,"flag":false,"er":1.0,"intub":0.0,"cline":0.0,"ctube":0.0,"suture":7.0,"cast":2.0,"triage":85.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":10.0},{"id":"8Njjpxz","student":"مفتاح محمد ناصر مفتاح المهدوي","hospital":"غير محدد","dept":"الإسعاف","date":"2026/07/24","time_in":"20:00:00","time_out":"8:00:00","hours":12.0,"flag":false,"er":0.0,"intub":0.0,"cline":0.0,"ctube":0.0,"suture":5.0,"cast":3.0,"triage":76.0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":8.0},{"id":"LD5V56v","student":"عمر صالح عمر اغليو","hospital":"مركز بنغازي الطبي","dept":"الجراحة","date":"2026/07/26","time_in":"8:42:00","time_out":"0:59:00","hours":16.28,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":1.0,"opd":0,"ward":11.0,"icu_hrs":0,"icu_cases":0,"activity":12.0},{"id":"jeGgpaE","student":"محمود محمد الطاهر بن عياد","hospital":"مستشفى الحوادث أبو سليم","dept":"الجراحة","date":"2026/07/26","time_in":"9:45:00","time_out":"6:40:00","hours":20.92,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":0},{"id":"bZNgDl7","student":"محمود محمد الطاهر بن عياد","hospital":"مستشفى الحوادث أبو سليم","dept":"الجراحة","date":"2026/07/26","time_in":"9:45:00","time_out":"6:40:00","hours":0,"flag":false,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":0},{"id":"xV9GgVG","student":"جلال عز الدين الطيب الزاوي","hospital":"مستشفى الحوادث أبو سليم","dept":"الإسعاف","date":"2026/07/20","time_in":"8:10:00","time_out":"8:00:00","hours":23.83,"flag":false,"er":7.0,"intub":0.0,"cline":0.0,"ctube":0.0,"suture":4.0,"cast":2.0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":0,"icu_cases":0,"activity":13.0},{"id":"4aA4WyA","student":"ربيع","hospital":"غير محدد","dept":"التخدير والعناية المركزة","date":"2026/07/23","time_in":"9:00:00","time_out":"8:18:00","hours":288.0,"flag":true,"er":0,"intub":0,"cline":0,"ctube":0,"suture":0,"cast":0,"triage":0,"or1":0,"or2":0,"or3":0,"opd":0,"ward":0,"icu_hrs":12.0,"icu_cases":5.0,"activity":5.0}];
-</script>
-<script>
-const DEPT_LABELS = { 'الجراحة':'الأقسام الجراحية', 'التخدير والعناية المركزة':'التخدير والعناية المركزة', 'الإسعاف':'قسم الإسعاف' };
-const DEPT_BADGE = { 'الجراحة':'surg', 'التخدير والعناية المركزة':'anes', 'الإسعاف':'er' };
-const DEPT_COLOR = { 'الجراحة':'#5D131A', 'التخدير والعناية المركزة':'#3E7A5C', 'الإسعاف':'#C0A046' };
+// رابط CSV المباشر الخاص بجوجل شيت
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQVB8wgMVyAkS4XR08o7X6fBVzQhj32ORK0wirSLyd7tFte-jZ9Zzyh8PwRHcEJNlz0ZDaM0EYCAf/pub?gid=0&single=true&output=csv';
 
-let state = { student:'', dept:'', hospital:'', search:'', sortKey:'date', sortDir:'asc' };
+let RECORDS = [];
 
-function uniqueSorted(arr){ return [...new Set(arr)].filter(Boolean).sort((a,b)=>a.localeCompare(b,'ar')); }
-
-function populateFilters(){
-  const studentSel = document.getElementById('fStudent');
-  const deptSel = document.getElementById('fDept');
-  const hospSel = document.getElementById('fHospital');
-  uniqueSorted(RECORDS.map(r=>r.student)).forEach(s=>{
-    const o = document.createElement('option'); o.value = s; o.textContent = s; studentSel.appendChild(o);
-  });
-  uniqueSorted(RECORDS.map(r=>r.dept)).forEach(d=>{
-    const o = document.createElement('option'); o.value = d; o.textContent = DEPT_LABELS[d] || d; deptSel.appendChild(o);
-  });
-  uniqueSorted(RECORDS.map(r=>r.hospital)).forEach(h=>{
-    const o = document.createElement('option'); o.value = h; o.textContent = h; hospSel.appendChild(o);
-  });
+// دالة جلب البيانات الحية من جوجل شيت
+async function loadSheetData() {
+  try {
+    const response = await fetch(SHEET_CSV_URL + '&t=' + new Date().getTime());
+    const csvText = await response.text();
+    RECORDS = parseCSV(csvText);
+    renderDashboard();
+  } catch (error) {
+    console.error('خطأ أثناء جلب البيانات من Google Sheets:', error);
+  }
 }
 
-function filteredRecords(){
-  return RECORDS.filter(r=>{
-    if(state.student && r.student !== state.student) return false;
-    if(state.dept && r.dept !== state.dept) return false;
-    if(state.hospital && r.hospital !== state.hospital) return false;
-    if(state.search){
-      const q = state.search.trim();
-      if(!(r.student.includes(q) || r.hospital.includes(q))) return false;
-    }
-    return true;
-  });
-}
+// دالة تفكيك CSV
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
 
-function parseDate(d){ // "2026/06/07" -> Date
-  const [y,m,day] = d.split('/').map(Number);
-  return new Date(y, m-1, day);
-}
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
 
-function weekKey(date){
-  const d = parseDate(date);
-  const onejan = new Date(d.getFullYear(),0,1);
-  const week = Math.ceil((((d - onejan) / 86400000) + onejan.getDay()+1)/7);
-  return `أسبوع ${week}`;
-}
-
-let charts = {};
-function destroyCharts(){ Object.values(charts).forEach(c=>c && c.destroy()); charts = {}; }
-
-function render(){
-  const data = filteredRecords();
-  renderStats(data);
-  renderPeriod(data);
-  renderStudentChart(data);
-  renderDeptChart(data);
-  renderTimelineChart(data);
-  renderProcedureChart(data);
-  renderTable(data);
-}
-
-function renderStats(data){
-  document.getElementById('statSubmissions').textContent = data.length.toLocaleString('ar');
-  document.getElementById('statStudents').textContent = uniqueSorted(data.map(r=>r.student)).length.toLocaleString('ar');
-  const validHours = data.filter(r=>!r.flag);
-  const totalHours = validHours.reduce((s,r)=>s+r.hours,0);
-  document.getElementById('statHours').textContent = Math.round(totalHours).toLocaleString('ar');
-  const flaggedCount = data.length - validHours.length;
-  document.getElementById('hoursSub').innerHTML = flaggedCount ? `ساعة حضور موثّقة · <b>${flaggedCount}</b> سجل مستثنى لخطأ إدخال` : 'ساعة حضور موثّقة';
-  const totalActivity = data.reduce((s,r)=>s+r.activity,0);
-  document.getElementById('statActivity').textContent = Math.round(totalActivity).toLocaleString('ar');
-}
-
-function renderPeriod(data){
-  if(!data.length){ document.getElementById('periodLabel').textContent = '—'; return; }
-  const dates = data.map(r=>parseDate(r.date)).sort((a,b)=>a-b);
-  const fmt = d => d.toLocaleDateString('ar-LY',{day:'numeric',month:'short'});
-  document.getElementById('periodLabel').textContent = `${fmt(dates[0])} – ${fmt(dates[dates.length-1])}`;
-}
-
-function renderStudentChart(data){
-  const students = uniqueSorted(data.map(r=>r.student));
-  const depts = ['الجراحة','التخدير والعناية المركزة','الإسعاف'];
-  const datasets = depts.map(d=>({
-    label: DEPT_LABELS[d],
-    backgroundColor: DEPT_COLOR[d],
-    data: students.map(s => data.filter(r=>r.student===s && r.dept===d && !r.flag).reduce((sum,r)=>sum+r.hours,0)),
-    stack: 'hrs'
-  }));
-  const ctx = document.getElementById('chartStudents');
-  charts.students = new Chart(ctx, {
-    type:'bar',
-    data:{ labels: students, datasets },
-    options:{
-      indexAxis:'y',
-      responsive:true, maintainAspectRatio:false,
-      scales:{ x:{ stacked:true, grid:{color:'#EEEAE2'} }, y:{ stacked:true, grid:{display:false} } },
-      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:11, font:{family:'IBM Plex Sans Arabic', size:11.5} } } }
-    }
+  return lines.slice(1).map(line => {
+    const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
+    let row = {};
+    headers.forEach((header, index) => {
+      let val = values[index] ? values[index].trim().replace(/^"|"$/g, '') : '';
+      if (val === 'true') val = true;
+      else if (val === 'false') val = false;
+      else if (!isNaN(val) && val !== '') val = Number(val);
+      row[header] = val;
+    });
+    return row;
   });
 }
 
-function renderDeptChart(data){
-  const depts = ['الجراحة','التخدير والعناية المركزة','الإسعاف'];
-  const totals = depts.map(d=>data.filter(r=>r.dept===d && !r.flag).reduce((s,r)=>s+r.hours,0));
-  const ctx = document.getElementById('chartDept');
-  charts.dept = new Chart(ctx, {
-    type:'doughnut',
-    data:{ labels: depts.map(d=>DEPT_LABELS[d]), datasets:[{ data: totals, backgroundColor: depts.map(d=>DEPT_COLOR[d]), borderWidth:2, borderColor:'#fff' }] },
-    options:{
-      responsive:true, maintainAspectRatio:false, cutout:'62%',
-      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:11, font:{family:'IBM Plex Sans Arabic', size:11.5} } } }
-    }
-  });
-}
+// رسم وعرض البيانات
+function renderDashboard() {
+  document.getElementById('statSubmissions').innerText = RECORDS.length;
+  
+  const students = [...new Set(RECORDS.map(r => r.student || r['الطالب المتدرب']).filter(Boolean))];
+  document.getElementById('statStudents').innerText = students.length;
 
-function renderTimelineChart(data){
-  const validData = data.filter(r=>!r.flag);
-  const weeks = {};
-  validData.forEach(r=>{
-    const wk = weekKey(r.date);
-    weeks[wk] = (weeks[wk]||0) + r.hours;
-  });
-  const labels = Object.keys(weeks).sort((a,b)=> parseInt(a.replace(/\D/g,''),10) - parseInt(b.replace(/\D/g,''),10));
-  const ctx = document.getElementById('chartTimeline');
-  charts.timeline = new Chart(ctx, {
-    type:'line',
-    data:{ labels, datasets:[{
-      label:'إجمالي الساعات',
-      data: labels.map(l=>Math.round(weeks[l]*10)/10),
-      borderColor:'#5D131A', backgroundColor:'rgba(93,19,26,0.08)',
-      fill:true, tension:.35, pointBackgroundColor:'#C0A046', pointRadius:4, pointBorderColor:'#fff', pointBorderWidth:1.5
-    }]},
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      scales:{ y:{ grid:{color:'#EEEAE2'} }, x:{ grid:{display:false} } },
-      plugins:{ legend:{ display:false } }
-    }
-  });
-}
-
-function renderProcedureChart(data){
-  const map = {
-    'أنبوب تنفس (Intubation)': data.reduce((s,r)=>s+r.intub,0),
-    'قسطرة وريدية (Central Line)': data.reduce((s,r)=>s+r.cline,0),
-    'أنبوب صدر (Chest Tube)': data.reduce((s,r)=>s+r.ctube,0),
-    'خياطة جروح (Suturing)': data.reduce((s,r)=>s+r.suture,0),
-    'تجبير (Casting)': data.reduce((s,r)=>s+r.cast,0),
-    'عمليات (OR)': data.reduce((s,r)=>s+r.or1+r.or2+r.or3,0),
-    'العيادة الخارجية (OPD)': data.reduce((s,r)=>s+r.opd,0),
-    'حالات القسم (Ward)': data.reduce((s,r)=>s+r.ward,0),
-    'متابعة عناية (ICU)': data.reduce((s,r)=>s+r.icu_cases,0),
-  };
-  const entries = Object.entries(map).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
-  const ctx = document.getElementById('chartProcedures');
-  charts.procedures = new Chart(ctx, {
-    type:'bar',
-    data:{ labels: entries.map(e=>e[0]), datasets:[{
-      data: entries.map(e=>Math.round(e[1])),
-      backgroundColor:'#18272F', borderRadius:5, maxBarThickness:26
-    }]},
-    options:{
-      indexAxis:'y',
-      responsive:true, maintainAspectRatio:false,
-      scales:{ x:{ grid:{color:'#EEEAE2'} }, y:{ grid:{display:false} } },
-      plugins:{ legend:{ display:false } }
-    }
-  });
-}
-
-function renderTable(data){
-  const sorted = [...data].sort((a,b)=>{
-    let va, vb;
-    switch(state.sortKey){
-      case 'student': va=a.student; vb=b.student; break;
-      case 'dept': va=a.dept; vb=b.dept; break;
-      case 'hospital': va=a.hospital; vb=b.hospital; break;
-      case 'date': va=parseDate(a.date); vb=parseDate(b.date); break;
-      case 'time_in': va=a.time_in; vb=b.time_in; break;
-      case 'time_out': va=a.time_out; vb=b.time_out; break;
-      case 'hours': va=a.hours; vb=b.hours; break;
-      case 'activity': va=a.activity; vb=b.activity; break;
-      default: va=a.date; vb=b.date;
-    }
-    if(va < vb) return state.sortDir==='asc' ? -1 : 1;
-    if(va > vb) return state.sortDir==='asc' ? 1 : -1;
-    return 0;
-  });
+  let totalHours = 0;
+  let totalActivity = 0;
 
   const tbody = document.getElementById('tableBody');
-  if(!sorted.length){
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="8">لا توجد سجلات مطابقة لمعايير التصفية الحالية</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = sorted.map(r=>`
-    <tr>
-      <td>${r.student}</td>
-      <td><span class="badge ${DEPT_BADGE[r.dept]||''}">${DEPT_LABELS[r.dept]||r.dept}</span></td>
-      <td>${r.hospital}</td>
-      <td>${r.date}</td>
-      <td>${r.time_in.trim()}</td>
-      <td>${r.time_out.trim()}</td>
-      <td class="hours-cell">${r.hours.toFixed(1)}${r.flag ? ' <span class="flag" title="ساعات غير منطقية، يُرجى مراجعة وقت الانصراف">⚠</span>' : ''}</td>
-      <td>${r.activity ? Math.round(r.activity) : '—'}</td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = '';
+
+  RECORDS.forEach(r => {
+    const hrs = Number(r.hours || r['الساعات الفعلية'] || 0);
+    const act = Number(r.activity || r['الحالات/الإجراءات'] || 0);
+    totalHours += hrs;
+    totalActivity += act;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.student || r['الطالب المتدرب'] || '-'}</td>
+      <td>${r.dept || r['القسم'] || '-'}</td>
+      <td>${r.hospital || r['المستشفى'] || '-'}</td>
+      <td>${r.date || r['التاريخ'] || '-'}</td>
+      <td>${r.time_in || r['الحضور'] || '-'}</td>
+      <td>${r.time_out || r['الانصراف'] || '-'}</td>
+      <td><b>${hrs}</b></td>
+      <td>${act}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('statHours').innerText = totalHours.toFixed(1);
+  document.getElementById('statActivity').innerText = totalActivity;
 }
 
-function wireEvents(){
-  document.getElementById('fStudent').addEventListener('change', e=>{ state.student=e.target.value; destroyCharts(); render(); });
-  document.getElementById('fDept').addEventListener('change', e=>{ state.dept=e.target.value; destroyCharts(); render(); });
-  document.getElementById('fHospital').addEventListener('change', e=>{ state.hospital=e.target.value; destroyCharts(); render(); });
-  document.getElementById('tableSearch').addEventListener('input', e=>{ state.search=e.target.value; renderTable(filteredRecords()); });
-  document.getElementById('resetBtn').addEventListener('click', ()=>{
-    state = { student:'', dept:'', hospital:'', search:'', sortKey:'date', sortDir:'asc' };
-    document.getElementById('fStudent').value='';
-    document.getElementById('fDept').value='';
-    document.getElementById('fHospital').value='';
-    document.getElementById('tableSearch').value='';
-    destroyCharts(); render();
-  });
-  document.querySelectorAll('#dataTable thead th[data-key]').forEach(th=>{
-    th.style.cursor='pointer';
-    th.addEventListener('click', ()=>{
-      const key = th.dataset.key;
-      if(state.sortKey === key){ state.sortDir = state.sortDir==='asc' ? 'desc' : 'asc'; }
-      else { state.sortKey = key; state.sortDir = 'asc'; }
-      renderTable(filteredRecords());
-    });
-  });
-}
-
-populateFilters();
-wireEvents();
-render();
+// التشغيل التلقائي عند التحميل والتحديث كل 60 ثانية
+window.addEventListener('DOMContentLoaded', () => {
+  loadSheetData();
+  setInterval(loadSheetData, 60000);
+});
 </script>
 </body>
 </html>
