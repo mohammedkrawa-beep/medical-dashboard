@@ -265,13 +265,13 @@ footer{
 <div class="topbar">
   <div class="topbar-inner">
     <div>
-      <div class="brand-eyebrow">مركز طب الطوارئ والدعم — لجنة متابعة وتقييم لأداء طلبة الماجستير</div>
+      <div class="brand-eyebrow">مركز طب الطوارئ والدعم — مكتب شؤون المكاتب</div>
       <h1>لوحة متابعة برنامج تدريب الأطباء</h1>
       <p>متابعة تفاعلية للحضور والساعات الفعلية والإجراءات الطبية للأطباء المتدربين عبر أقسام الجراحة والتخدير والعناية المركزة والإسعاف، بالشراكة مع الاستشاريين الإيطاليين.</p>
     </div>
     <div class="period-chip">
       <div class="label">الفترة المشمولة</div>
-      <div class="value" id="periodLabel">جاري التحميل…</div>
+      <div class="value" id="periodLabel">—</div>
     </div>
   </div>
 </div>
@@ -376,100 +376,96 @@ footer{
 </div>
 
 <script>
-// رابط Google Sheet المنشور كـ CSV
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQVB8wgMVyAkS4XR08o7X6fBVzQhj32ORK0wirSLyd7tFte-jZ9Zzyh8PwRHcEJNlz0ZDaM0EYCAf/pub?gid=0&single=true&output=csv";
 
 let RECORDS = [];
-
 const DEPT_LABELS = { 'الجراحة':'الأقسام الجراحية', 'التخدير والعناية المركزة':'التخدير والعناية المركزة', 'الإسعاف':'قسم الإسعاف' };
 const DEPT_BADGE = { 'الجراحة':'surg', 'التخدير والعناية المركزة':'anes', 'الإسعاف':'er' };
 const DEPT_COLOR = { 'الجراحة':'#5D131A', 'التخدير والعناية المركزة':'#3E7A5C', 'الإسعاف':'#C0A046' };
 
 let state = { student:'', dept:'', hospital:'', search:'', sortKey:'date', sortDir:'asc' };
 
-// دالة تفكيك CSV مع مراعاة النصوص المعنونة بفاصلة
-function parseCSVLine(text) {
-  let p = '', c = '', r = [];
-  let q = false;
-  for (let i = 0; i < text.length; i++) {
-    c = text[i];
-    if (c === '"') {
-      if (q && text[i+1] === '"') { p += '"'; i++; }
-      else { q = !q; }
-    } else if (c === ',' && !q) {
-      r.push(p); p = '';
-    } else {
-      p += c;
+function parseCSV(text) {
+  const lines = text.split('\n').filter(l => l.trim() !== '');
+  if (lines.length < 2) return [];
+  
+  const parseLine = (line) => {
+    let res = [], cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      let c = line[i];
+      if (c === '"' && line[i+1] === '"') { cur += '"'; i++; }
+      else if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { res.push(cur.trim()); cur = ''; }
+      else { cur += c; }
     }
-  }
-  r.push(p);
-  return r;
+    res.push(cur.trim());
+    return res;
+  };
+
+  const headers = parseLine(lines[0]);
+  return lines.slice(1).map((line, idx) => {
+    const row = parseLine(line);
+    const getVal = (key) => {
+      const i = headers.findIndex(h => h.trim().toLowerCase() === key.toLowerCase());
+      return i !== -1 && row[i] ? row[i] : '';
+    };
+    const getNum = (key) => parseFloat(getVal(key)) || 0;
+
+    let timeIn = getVal('time_in') || '00:00:00';
+    let timeOut = getVal('time_out') || '00:00:00';
+    let hours = getNum('hours');
+    
+    // حساب تلقائي للساعات إذا كانت النتيجة 0
+    if (hours === 0 && timeIn !== '00:00:00' && timeOut !== '00:00:00') {
+      let [h1, m1] = timeIn.split(':').map(Number);
+      let [h2, m2] = timeOut.split(':').map(Number);
+      if (!isNaN(h1) && !isNaN(h2)) {
+        let diff = (h2 + (m2||0)/60) - (h1 + (m1||0)/60);
+        if (diff < 0) diff += 24;
+        hours = Math.round(diff * 100) / 100;
+      }
+    }
+
+    let isFlagged = hours > 30 || getVal('flag').toLowerCase() === 'true';
+
+    let intub = getNum('intub'), cline = getNum('cline'), ctube = getNum('ctube'),
+        suture = getNum('suture'), cast = getNum('cast'), triage = getNum('triage'),
+        or1 = getNum('or1'), or2 = getNum('or2'), or3 = getNum('or3'),
+        opd = getNum('opd'), ward = getNum('ward'), icu_cases = getNum('icu_cases');
+
+    let activity = getNum('activity');
+    if (activity === 0) {
+      activity = intub + cline + ctube + suture + cast + triage + or1 + or2 + or3 + opd + ward + icu_cases;
+    }
+
+    return {
+      id: getVal('id') || `rec_${idx}`,
+      student: getVal('student') || 'غير محدد',
+      hospital: getVal('hospital') || 'غير محدد',
+      dept: getVal('dept') || 'الجراحة',
+      date: getVal('date') || '',
+      time_in: timeIn,
+      time_out: timeOut,
+      hours: hours,
+      flag: isFlagged,
+      er: getNum('er'),
+      intub: intub, cline: cline, ctube: ctube, suture: suture, cast: cast, triage: triage,
+      or1: or1, or2: or2, or3: or3, opd: opd, ward: ward,
+      icu_hrs: getNum('icu_hrs'), icu_cases: icu_cases,
+      activity: activity
+    };
+  });
 }
 
-// جلب البيانات من ملف الجوجل شيت مباشرة وتجهيزها
-async function loadLiveData() {
+async function loadData() {
   try {
     const response = await fetch(SHEET_CSV_URL);
-    const csvText = await response.text();
-    const lines = csvText.split(/\r\n|\n/).filter(line => line.trim() !== '');
-    if (lines.length < 2) return;
-
-    const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
-    
-    // دالة مساعدة للحصول على صيغة رقمية من النص
-    const getNum = (row, key) => {
-      const idx = headers.indexOf(key);
-      if (idx === -1 || !row[idx]) return 0;
-      const val = parseFloat(row[idx].toString().replace(/,/g, ''));
-      return isNaN(val) ? 0 : val;
-    };
-
-    const getStr = (row, key) => {
-      const idx = headers.indexOf(key);
-      return (idx !== -1 && row[idx]) ? row[idx].trim() : '';
-    };
-
-    RECORDS = lines.slice(1).map((line, i) => {
-      const row = parseCSVLine(line);
-      const student = getStr(row, 'student') || 'غير محدد';
-      const hospital = getStr(row, 'hospital') || 'غير محدد';
-      const dept = getStr(row, 'dept') || 'غير محدد';
-      const date = getStr(row, 'date');
-      const time_in = getStr(row, 'time_in');
-      const time_out = getStr(row, 'time_out');
-      const hours = getNum(row, 'hours');
-      const flagStr = getStr(row, 'flag').toLowerCase();
-      const flag = flagStr === 'true' || flagStr === '1';
-
-      const er = getNum(row, 'er');
-      const intub = getNum(row, 'intub');
-      const cline = getNum(row, 'cline');
-      const ctube = getNum(row, 'ctube');
-      const suture = getNum(row, 'suture');
-      const cast = getNum(row, 'cast');
-      const triage = getNum(row, 'triage');
-      const or1 = getNum(row, 'or1');
-      const or2 = getNum(row, 'or2');
-      const or3 = getNum(row, 'or3');
-      const opd = getNum(row, 'opd');
-      const ward = getNum(row, 'ward');
-      const icu_hrs = getNum(row, 'icu_hrs');
-      const icu_cases = getNum(row, 'icu_cases');
-      const activity = getNum(row, 'activity');
-
-      return {
-        id: getStr(row, 'id') || String(i),
-        student, hospital, dept, date, time_in, time_out,
-        hours, flag, er, intub, cline, ctube, suture, cast,
-        triage, or1, or2, or3, opd, ward, icu_hrs, icu_cases, activity
-      };
-    });
-
+    const text = await response.text();
+    RECORDS = parseCSV(text);
     populateFilters();
     render();
   } catch (err) {
-    console.error("فشل في تحميل البيانات التفاعلية من الشيت:", err);
-    document.getElementById('periodLabel').textContent = 'خطأ في جلب البيانات';
+    console.error("خطأ في جلب البيانات:", err);
   }
 }
 
@@ -508,11 +504,11 @@ function filteredRecords(){
   });
 }
 
-function parseDate(d){ // "2026/06/07" -> Date
+function parseDate(d){
   if(!d) return new Date(0);
-  const parts = d.split(/[\/\-]/).map(Number);
-  if(parts.length < 3) return new Date(0);
-  return new Date(parts[0], parts[1]-1, parts[2]);
+  const parts = d.split(/[/,-]/).map(Number);
+  if(parts.length === 3) return new Date(parts[0], parts[1]-1, parts[2]);
+  return new Date(d);
 }
 
 function weekKey(date){
@@ -526,7 +522,6 @@ let charts = {};
 function destroyCharts(){ Object.values(charts).forEach(c=>c && c.destroy()); charts = {}; }
 
 function render(){
-  destroyCharts();
   const data = filteredRecords();
   renderStats(data);
   renderPeriod(data);
@@ -551,7 +546,7 @@ function renderStats(data){
 
 function renderPeriod(data){
   if(!data.length){ document.getElementById('periodLabel').textContent = '—'; return; }
-  const dates = data.map(r=>parseDate(r.date)).filter(d=>!isNaN(d.getTime())).sort((a,b)=>a-b);
+  const dates = data.map(r=>parseDate(r.date)).filter(d => !isNaN(d)).sort((a,b)=>a-b);
   if(!dates.length){ document.getElementById('periodLabel').textContent = '—'; return; }
   const fmt = d => d.toLocaleDateString('ar-LY',{day:'numeric',month:'short'});
   document.getElementById('periodLabel').textContent = `${fmt(dates[0])} – ${fmt(dates[dates.length-1])}`;
@@ -562,7 +557,7 @@ function renderStudentChart(data){
   const depts = ['الجراحة','التخدير والعناية المركزة','الإسعاف'];
   const datasets = depts.map(d=>({
     label: DEPT_LABELS[d] || d,
-    backgroundColor: DEPT_COLOR[d] || '#C0A046',
+    backgroundColor: DEPT_COLOR[d] || '#18272F',
     data: students.map(s => data.filter(r=>r.student===s && r.dept===d && !r.flag).reduce((sum,r)=>sum+r.hours,0)),
     stack: 'hrs'
   }));
@@ -585,7 +580,7 @@ function renderDeptChart(data){
   const ctx = document.getElementById('chartDept');
   charts.dept = new Chart(ctx, {
     type:'doughnut',
-    data:{ labels: depts.map(d=>DEPT_LABELS[d]||d), datasets:[{ data: totals, backgroundColor: depts.map(d=>DEPT_COLOR[d]||'#C0A046'), borderWidth:2, borderColor:'#fff' }] },
+    data:{ labels: depts.map(d=>DEPT_LABELS[d]||d), datasets:[{ data: totals, backgroundColor: depts.map(d=>DEPT_COLOR[d]||'#18272F'), borderWidth:2, borderColor:'#fff' }] },
     options:{
       responsive:true, maintainAspectRatio:false, cutout:'62%',
       plugins:{ legend:{ position:'bottom', labels:{ boxWidth:11, font:{family:'IBM Plex Sans Arabic', size:11.5} } } }
@@ -597,8 +592,10 @@ function renderTimelineChart(data){
   const validData = data.filter(r=>!r.flag);
   const weeks = {};
   validData.forEach(r=>{
-    const wk = weekKey(r.date);
-    weeks[wk] = (weeks[wk]||0) + r.hours;
+    if(r.date){
+      const wk = weekKey(r.date);
+      weeks[wk] = (weeks[wk]||0) + r.hours;
+    }
   });
   const labels = Object.keys(weeks).sort((a,b)=> parseInt(a.replace(/\D/g,''),10) - parseInt(b.replace(/\D/g,''),10));
   const ctx = document.getElementById('chartTimeline');
@@ -677,8 +674,8 @@ function renderTable(data){
       <td><span class="badge ${DEPT_BADGE[r.dept]||''}">${DEPT_LABELS[r.dept]||r.dept}</span></td>
       <td>${r.hospital}</td>
       <td>${r.date}</td>
-      <td>${r.time_in}</td>
-      <td>${r.time_out}</td>
+      <td>${r.time_in.trim()}</td>
+      <td>${r.time_out.trim()}</td>
       <td class="hours-cell">${r.hours.toFixed(1)}${r.flag ? ' <span class="flag" title="ساعات غير منطقية، يُرجى مراجعة وقت الانصراف">⚠</span>' : ''}</td>
       <td>${r.activity ? Math.round(r.activity) : '—'}</td>
     </tr>
@@ -686,9 +683,9 @@ function renderTable(data){
 }
 
 function wireEvents(){
-  document.getElementById('fStudent').addEventListener('change', e=>{ state.student=e.target.value; render(); });
-  document.getElementById('fDept').addEventListener('change', e=>{ state.dept=e.target.value; render(); });
-  document.getElementById('fHospital').addEventListener('change', e=>{ state.hospital=e.target.value; render(); });
+  document.getElementById('fStudent').addEventListener('change', e=>{ state.student=e.target.value; destroyCharts(); render(); });
+  document.getElementById('fDept').addEventListener('change', e=>{ state.dept=e.target.value; destroyCharts(); render(); });
+  document.getElementById('fHospital').addEventListener('change', e=>{ state.hospital=e.target.value; destroyCharts(); render(); });
   document.getElementById('tableSearch').addEventListener('input', e=>{ state.search=e.target.value; renderTable(filteredRecords()); });
   document.getElementById('resetBtn').addEventListener('click', ()=>{
     state = { student:'', dept:'', hospital:'', search:'', sortKey:'date', sortDir:'asc' };
@@ -696,7 +693,7 @@ function wireEvents(){
     document.getElementById('fDept').value='';
     document.getElementById('fHospital').value='';
     document.getElementById('tableSearch').value='';
-    render();
+    destroyCharts(); render();
   });
   document.querySelectorAll('#dataTable thead th[data-key]').forEach(th=>{
     th.style.cursor='pointer';
@@ -710,7 +707,7 @@ function wireEvents(){
 }
 
 wireEvents();
-loadLiveData();
+loadData();
 </script>
 </body>
 </html>
