@@ -50,7 +50,7 @@ tbody td { padding: 10px; border-bottom: 1px solid var(--line); }
     <div><label>الطبيب المتدرب</label><select id="fDoc" onchange="render()"><option value="">الكل</option></select></div>
     <div><label>القسم</label><select id="fDept" onchange="render()"><option value="">الكل</option></select></div>
     <div><label>المستشفى</label><select id="fHosp" onchange="render()"><option value="">الكل</option></select></div>
-    <input id="fSearch" placeholder="بحث..." oninput="render()" style="margin-inline-start:auto; background:#fff; color:#000;">
+    <input id="fSearch" placeholder="بحث عن طالب أو مستشفى..." oninput="render()" style="margin-inline-start:auto; background:#fff; color:#000;">
   </div>
 
   <div class="grid2">
@@ -85,7 +85,7 @@ tbody td { padding: 10px; border-bottom: 1px solid var(--line); }
             <th>الحضور</th>
             <th>الانصراف</th>
             <th>الساعات الفعلية</th>
-            <th>الإجراءات</th>
+            <th>الحالات/الإجراءات</th>
           </tr>
         </thead>
         <tbody id="tBody"></tbody>
@@ -99,45 +99,45 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4ttUdLyYhRECw7aAAO
 let RAW_DATA = [];
 let charts = {};
 
-// استخراج الساعات والدقائق مباشرة بغض النظر عن نص التاريخ المرفق
-function extractTime(str) {
-  if (!str) return '00:00';
-  let match = String(str).match(/(\d{1,2}):(\d{2})/);
+function extractTime(val) {
+  if (!val) return '00:00';
+  let str = String(val);
+  let match = str.match(/(\d{1,2}):(\d{2})/);
   if (match) {
-    let h = match[1].padStart(2, '0');
-    let m = match[2];
-    return `${h}:${m}`;
+    return `${match[1].padStart(2, '0')}:${match[2]}`;
   }
   return '00:00';
 }
 
-// استخراج التاريخ YYYY-MM-DD
-function extractDate(str) {
-  if (!str) return '';
-  let match = String(str).match(/\d{4}-\d{2}-\d{2}/);
+function extractDate(val) {
+  if (!val) return '';
+  let str = String(val);
+  let match = str.match(/\d{4}-\d{2}-\d{2}/);
   return match ? match[0] : '';
 }
 
-// حساب الفرق الدقيق بالساعات
 function calculateHours(tIn, tOut) {
-  let [h1, m1] = tIn.split(':').map(Number);
-  let [h2, m2] = tOut.split(':').map(Number);
-  if (isNaN(h1) || isNaN(h2)) return 0;
+  try {
+    let [h1, m1] = tIn.split(':').map(Number);
+    let [h2, m2] = tOut.split(':').map(Number);
+    if (isNaN(h1) || isNaN(h2)) return 0;
 
-  let total1 = (h1 * 60) + m1;
-  let total2 = (h2 * 60) + m2;
+    let total1 = (h1 * 60) + (m1 || 0);
+    let total2 = (h2 * 60) + (m2 || 0);
 
-  let diff = total2 - total1;
-  if (diff <= 0) diff += (24 * 60); // المناوبات الليلية عبر منتصف الليل
+    let diff = total2 - total1;
+    if (diff <= 0) diff += (24 * 60);
 
-  return Math.round((diff / 60) * 10) / 10;
+    return Math.round((diff / 60) * 10) / 10;
+  } catch (e) {
+    return 0;
+  }
 }
 
-// إيجاد بداية الأسبوع للتجميع الأسبوعي
 function getWeekLabel(dateStr) {
   if (!dateStr) return 'غير محدد';
   let d = new Date(dateStr);
-  if (isNaN(d.getTime())) return dateStr;
+  if (isNaN(d.getTime())) return 'غير محدد';
   let day = d.getDay();
   let diff = d.getDate() - day + (day === 0 ? -6 : 1);
   let monday = new Date(d.setDate(diff));
@@ -145,37 +145,64 @@ function getWeekLabel(dateStr) {
 }
 
 function parseRows(rows) {
-  if (!rows || rows.length < 2) return [];
+  if (!rows || !Array.isArray(rows) || rows.length < 2) return [];
+
+  // البحث عن الفهارس تلقائياً بحسب عناوين الأعمدة بالصف الأول
+  const headers = rows[0].map(h => String(h || '').trim().toLowerCase());
+  
+  const findIdx = (keys) => headers.findIndex(h => keys.some(k => h.includes(k.toLowerCase())));
+
+  let idxStudent = findIdx(['student', 'طالب', 'اسم']);
+  let idxDept = findIdx(['قسم', 'dept', 'الأقسام']);
+  let idxHosp = findIdx(['مستشفى', 'hospital']);
+  let idxDate = findIdx(['تاريخ', 'اليوم', 'date']);
+  let idxIn = findIdx(['حضور', 'time_in', 'in']);
+  let idxOut = findIdx(['انصراف', 'time_out', 'out']);
+  let idxAct = findIdx(['حالات', 'إجراءات', 'اجراءات', 'act']);
+
+  // في حال عدم العثور التلقائي يتم استخدام الفهارس الافتراضية
+  if (idxStudent === -1) idxStudent = 3;
+  if (idxDept === -1) idxDept = 8;
+  if (idxHosp === -1) idxHosp = 4;
+  if (idxDate === -1) idxDate = 5;
+  if (idxIn === -1) idxIn = 6;
+  if (idxOut === -1) idxOut = 7;
 
   return rows.slice(1).map(r => {
-    let student = String(r[0] || '').trim();
-    let dept = String(r[1] || '').trim();
-    
-    // ضبط التزييح الحاصل بالأعمدة بناءً على الصورة
-    let hosp = extractDate(r[2]) ? 'مستشفى الحوادث أبو سليم' : String(r[2] || '').trim();
-    let rawDate = extractDate(r[2]) || extractDate(r[3]);
-    let date = rawDate || '';
+    if (!r || !Array.isArray(r)) return null;
 
-    let tIn = extractTime(r[6] || r[4]);
-    let tOut = extractTime(r[7] || r[5]);
+    let student = String(r[idxStudent] || '').trim() || 'غير محدد';
+    let dept = String(r[idxDept] || '').trim() || 'غير محدد';
+    let hosp = String(r[idxHosp] || '').trim() || 'مستشفى الحوادث أبو سليم';
     
+    let rawDate = extractDate(r[idxDate]) || extractDate(r[idxHosp]);
+    let date = rawDate || '2026-05-25';
+
+    let tIn = extractTime(r[idxIn]);
+    let tOut = extractTime(r[idxOut]);
+
     let hours = calculateHours(tIn, tOut);
-    let act = parseFloat(r[8] || r[7] || 0) || 0;
+    let act = (idxAct !== -1 && r[idxAct]) ? (parseFloat(r[idxAct]) || 0) : 0;
 
     return { student, dept, hosp, date, tIn, tOut, hours, act };
-  });
+  }).filter(Boolean);
 }
 
 function handleJSONPResponse(data) {
-  RAW_DATA = parseRows(data);
-  initFilters();
-  render();
+  try {
+    RAW_DATA = parseRows(data);
+    initFilters();
+    render();
+  } catch (err) {
+    console.error("خطأ أثناء قراءة البيانات:", err);
+  }
 }
 
 function initFilters() {
   const fillSelect = (id, key) => {
     let sel = document.getElementById(id);
     let vals = [...new Set(RAW_DATA.map(r => r[key]).filter(Boolean))].sort();
+    sel.innerHTML = '<option value="">الكل</option>';
     vals.forEach(v => sel.innerHTML += `<option value="${v}">${v}</option>`);
   };
   fillSelect('fDoc', 'student');
