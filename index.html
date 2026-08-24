@@ -372,7 +372,7 @@ footer{
     </div>
   </div>
 
-  <footer>لوحة متابعة تفاعلية مُولّدة من بيانات نموذج التدريب اليومي · مركز طب الطوارئ والدعم — مكتب شؤون المكاتب</footer>
+  <footer>لوحة متابعة تفاعلية مُولّدة من بيانات نموذج التدريب اليومي · مركز طب الطوارئ والدعم - لجنة متابعة وتقييم الأداء لطلبة الماجستير</footer>
 </div>
 
 <script>
@@ -451,15 +451,103 @@ function parseCSV(text) {
   });
 }
 
+// 1. رابط الـ CSV المباشر
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQVB8wgMVyAkS4XR08o7X6fBVzQhj32ORK0wirSLyd7tFte-jZ9Zzyh8PwRHcEJNlz0ZDaM0EYCAf/pub?output=csv";
+
+let RECORDS = [];
+
+// 2. دالة قراءة الـ CSV المرنة
+function parseCSV(text) {
+  const lines = text.split('\n').filter(l => l.trim() !== '');
+  if (lines.length < 2) return [];
+  
+  const parseLine = (line) => {
+    let res = [], cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      let c = line[i];
+      if (c === '"' && line[i+1] === '"') { cur += '"'; i++; }
+      else if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { res.push(cur.trim()); cur = ''; }
+      else { cur += c; }
+    }
+    res.push(cur.trim());
+    return res;
+  };
+
+  const headers = parseLine(lines[0]).map(h => h.trim().toLowerCase());
+
+  const findVal = (row, keys) => {
+    for (let k of keys) {
+      const idx = headers.findIndex(h => h.includes(k.toLowerCase()));
+      if (idx !== -1 && row[idx]) return row[idx].trim();
+    }
+    return '';
+  };
+
+  return lines.slice(1).map((line, idx) => {
+    const row = parseLine(line);
+    const getNum = (keys) => parseFloat(findVal(row, keys)) || 0;
+
+    let timeIn = findVal(row, ['time_in', 'حضور', 'وقت الدخول']) || '00:00:00';
+    let timeOut = findVal(row, ['time_out', 'انصراف', 'وقت الخروج']) || '00:00:00';
+    let hours = getNum(['hours', 'الساعات', 'عدد الساعات']);
+    
+    if (hours === 0 && timeIn !== '00:00:00' && timeOut !== '00:00:00') {
+      let [h1, m1] = timeIn.split(':').map(Number);
+      let [h2, m2] = timeOut.split(':').map(Number);
+      if (!isNaN(h1) && !isNaN(h2)) {
+        let diff = (h2 + (m2||0)/60) - (h1 + (m1||0)/60);
+        if (diff < 0) diff += 24;
+        hours = Math.round(diff * 100) / 100;
+      }
+    }
+
+    let isFlagged = hours > 30 || findVal(row, ['flag', 'ملاحظات']).toLowerCase() === 'true';
+
+    let intub = getNum(['intub']), cline = getNum(['cline']), ctube = getNum(['ctube']),
+        suture = getNum(['suture']), cast = getNum(['cast']), triage = getNum(['triage']),
+        or1 = getNum(['or1']), or2 = getNum(['or2']), or3 = getNum(['or3']),
+        opd = getNum(['opd']), ward = getNum(['ward']), icu_cases = getNum(['icu_cases']);
+
+    let activity = getNum(['activity', 'إجراءات', 'الحالات']);
+    if (activity === 0) {
+      activity = intub + cline + ctube + suture + cast + triage + or1 + or2 + or3 + opd + ward + icu_cases;
+    }
+
+    return {
+      id: findVal(row, ['submission id', 'id']) || `rec_${idx}`,
+      student: findVal(row, ['student', 'الطالب', 'اسم الطبيب', 'المتدرب']) || 'غير محدد',
+      hospital: findVal(row, ['hospital', 'المستشفى']) || 'غير محدد',
+      dept: findVal(row, ['dept', 'القسم']) || 'الجراحة',
+      date: findVal(row, ['date', 'التاريخ']) || '',
+      time_in: timeIn,
+      time_out: timeOut,
+      hours: hours,
+      flag: isFlagged,
+      er: getNum(['er']),
+      intub: intub, cline: cline, ctube: ctube, suture: suture, cast: cast, triage: triage,
+      or1: or1, or2: or2, or3: or3, opd: opd, ward: ward,
+      icu_hrs: getNum(['icu_hrs']), icu_cases: icu_cases,
+      activity: activity
+    };
+  });
+}
+
+// 3. دالة الجلب المحدثة لفك حظر البيانات
 async function loadData() {
   try {
-    const response = await fetch(SHEET_CSV_URL);
+    const proxyUrl = "https://api.allorigins.win/raw?url=";
+    const response = await fetch(proxyUrl + encodeURIComponent(SHEET_CSV_URL));
+    
+    if (!response.ok) throw new Error(`خطأ: ${response.status}`);
+
     const text = await response.text();
     RECORDS = parseCSV(text);
+
     populateFilters();
     render();
   } catch (err) {
-    console.error("خطأ في جلب البيانات:", err);
+    console.error("تعذر جلب البيانات:", err);
   }
 }
 
