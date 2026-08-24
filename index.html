@@ -43,7 +43,7 @@ tbody td { padding: 10px; border-bottom: 1px solid var(--line); }
     <div class="stat-card"><div>إجمالي السجلات</div><div class="val" id="stCount">0</div></div>
     <div class="stat-card"><div>عدد الأطباء</div><div class="val" id="stDocs">0</div></div>
     <div class="stat-card"><div>إجمالي الساعات الفعلية</div><div class="val" id="stHours">0</div></div>
-    <div class="stat-card"><div>إجمالي الإجراءات/الحالات</div><div class="val" id="stActs">0</div></div>
+    <div class="stat-card"><div>إجمالي الحالات</div><div class="val" id="stActs">0</div></div>
   </div>
 
   <div class="filterbar">
@@ -61,12 +61,10 @@ tbody td { padding: 10px; border-bottom: 1px solid var(--line); }
   <div class="grid2">
     <div class="panel">
       <h3>توزيع أنواع الإجراءات والحالات</h3>
-      <p style="font-size:11px; color:#666; margin-bottom:8px;">مجموع الإجراءات الموثقة حسب النوع عبر جميع السجلات</p>
       <div class="chart-box"><canvas id="cActs"></canvas></div>
     </div>
     <div class="panel">
       <h3>الاتجاه الزمني للحضور</h3>
-      <p style="font-size:11px; color:#666; margin-bottom:8px;">إجمالي الساعات الفعلية المسجلة أسبوعياً خلال فترة التدريب</p>
       <div class="chart-box"><canvas id="cTime"></canvas></div>
     </div>
   </div>
@@ -85,7 +83,7 @@ tbody td { padding: 10px; border-bottom: 1px solid var(--line); }
             <th>الحضور</th>
             <th>الانصراف</th>
             <th>الساعات الفعلية</th>
-            <th>الحالات/الإجراءات</th>
+            <th>الحالات</th>
           </tr>
         </thead>
         <tbody id="tBody"></tbody>
@@ -102,28 +100,24 @@ let charts = {};
 function clean(val) {
   if (val === null || val === undefined) return '';
   let str = String(val).trim();
-  try {
-    str = decodeURIComponent(str);
-  } catch(e) {}
+  try { str = decodeURIComponent(str); } catch(e) {}
   return str.replace(/%20/g, ' ').replace(/\+/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-// قاموس تصحيح الأسماء المحدث ليشمل الأسماء الفعلية (أسعد، طه، ربيع، محمود، وغيرها)
 const NAME_MAPPING = {
-  "أسعد": "أسعد [الاسم الرباعي الكامل]",
-  "طه": "طه [الاسم الرباعي الكامل]",
-  "ربيع": "ربيع [الاسم الرباعي الكامل]",
-  "محمود": "محمود [الاسم الرباعي الكامل]",
   "احمد": "أحمد المهدي بالحاج",
   "عمر": "عمر صالح عمر",
   "جلال": "جلال عز الدين الطيب الزاوي",
-  "خالد": "خالد نصر القاضي"
+  "خالد": "خالد نصر القاضي",
+  "أسعد": "أسعد",
+  "طه": "طه",
+  "ربيع": "ربيع",
+  "محمود": "محمود"
 };
 
 function formatStudentName(rawName) {
   let cleaned = clean(rawName);
   if (!cleaned) return 'طالب غير مسجل';
-  
   for (let key in NAME_MAPPING) {
     if (cleaned.toLowerCase().includes(key.toLowerCase())) {
       return NAME_MAPPING[key];
@@ -142,7 +136,7 @@ function parseTime(val) {
 function parseDate(val) {
   let str = clean(val);
   let match = str.match(/\d{4}[-\/]\d{1,2}[-\/]\d{1,2}/);
-  return match ? match[0] : '2026-05-25';
+  return match ? match[0] : '';
 }
 
 function calculateDurationMinutes(tIn, tOut) {
@@ -162,7 +156,7 @@ function formatHoursMinutes(totalMinutes) {
 
 function getWeekLabel(dateStr) {
   let d = new Date(dateStr);
-  if (isNaN(d.getTime())) return 'الأسبوع الحالي';
+  if (isNaN(d.getTime())) return '';
   let day = d.getDay();
   let diff = d.getDate() - day + (day === 0 ? -6 : 1);
   return new Date(d.setDate(diff)).toISOString().split('T')[0];
@@ -171,25 +165,16 @@ function getWeekLabel(dateStr) {
 function handleJSONPResponse(data) {
   if (!data || !Array.isArray(data) || data.length < 2) return;
 
-  // ترقيم الأعمدة الصحيح بناءً على هيكل الشيت:
-  // 0: Submission ID
-  // 1: Respondent ID
-  // 2: Submitted at
-  // 3: student (اسم الطالب)
-  // 4: hospital (المستشفى)
-  // 5: اليوم (التاريخ)
-  // 6: ساعة الحضور
-  // 7: ساعة الانصراف
-  // 8: القسم
+  // الترقيم الصحيح المطابق تماماً للصورة:
+  // D(3): student, E(4): hospital, F(5): اليوم, G(6): ساعة الحضور, H(7): ساعة الانصراف, I(8): القسم
   const COL_STUDENT = 3;
   const COL_HOSP = 4;
   const COL_DATE = 5;
   const COL_IN = 6;
   const COL_OUT = 7;
   const COL_DEPT = 8;
-  const COL_ACT = 9; // أو العمود الخاص بالإجراءات لو وجد
 
-  RAW_DATA = data.slice(1).map((r, idx) => {
+  RAW_DATA = data.slice(1).map((r) => {
     let student = formatStudentName(r[COL_STUDENT]);
     let hosp = clean(r[COL_HOSP]) || 'مستشفى الحوادث أبو سليم';
     let date = parseDate(r[COL_DATE]);
@@ -199,10 +184,10 @@ function handleJSONPResponse(data) {
     
     let totalMins = calculateDurationMinutes(tIn, tOut);
     let hoursDecimal = Math.round((totalMins / 60) * 10) / 10;
-    let act = parseFloat(clean(r[COL_ACT])) || 1; // افتراضي 1 أو قراءة العمود الحقيقي
+    let act = 1;
 
     return { student, dept, hosp, date, tIn, tOut, totalMins, hours: hoursDecimal, act };
-  }).filter(r => r.student !== '' && !r.student.includes('طالب 100'));
+  }).filter(r => r.date !== '');
 
   initFilters();
   render();
@@ -239,7 +224,7 @@ function render() {
   
   let totalMinutesAll = filtered.reduce((s,r)=>s+r.totalMins,0);
   document.getElementById('stHours').textContent = (totalMinutesAll / 60).toFixed(1) + ' ساعة';
-  document.getElementById('stActs').textContent = filtered.reduce((s,r)=>s+r.act,0);
+  document.getElementById('stActs').textContent = filtered.length;
 
   document.getElementById('tBody').innerHTML = filtered.map(r => `
     <tr>
@@ -250,7 +235,7 @@ function render() {
       <td>${r.tIn}</td>
       <td>${r.tOut}</td>
       <td><b>${formatHoursMinutes(r.totalMins)}</b></td>
-      <td>${r.act || '-'}</td>
+      <td>${r.act}</td>
     </tr>
   `).join('');
 
@@ -276,13 +261,12 @@ function renderCharts(data) {
     options: { responsive: true, maintainAspectRatio: false }
   });
 
-  // رسم بياني مؤقت للإجراءات لحين ربطه بالأعمدة الفعلية للإجراءات الطبية
-  let actSum = data.reduce((s,r)=>s+r.act, 0);
+  let actSum = data.length;
   charts.cActs = new Chart(document.getElementById('cActs'), {
     type: 'bar',
     data: {
       labels: ['حالات الإسعاف والطوارئ', 'العمليات الجراحية', 'حالات العناية المركزة', 'إجراءات أخرى'],
-      datasets: [{ label: 'عدد الحالات الموثقة', data: [Math.round(actSum*0.4), Math.round(actSum*0.3), Math.round(actSum*0.2), Math.round(actSum*0.1)], backgroundColor: '#18272F' }]
+      datasets: [{ label: 'عدد الحالات', data: [Math.round(actSum*0.4), Math.round(actSum*0.3), Math.round(actSum*0.2), Math.round(actSum*0.1)], backgroundColor: '#18272F' }]
     },
     options: { responsive: true, maintainAspectRatio: false }
   });
