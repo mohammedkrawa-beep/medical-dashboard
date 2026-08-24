@@ -240,32 +240,16 @@ footer{ text-align:center; color:var(--muted); font-size:12px; padding:26px 20px
 </div>
 
 <script>
-// رابط تصدير الشيت بصيغة CSV المباشر
-const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQVB8wgMVyAkS4XR08o7X6fBVzQhj32ORK0wirSLyd7tFte-jZ9Zzyh8PwRHcEJNlz0ZDaM0EYCAf/pub?output=csv";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4ttUdLyYhRECw7aAAOZn4ixlVMh6MH1D238K3YfBIo2kox5CNBM7K7622N9nBO1JqNQ/exec";
 
 let RECORDS = [];
 let state = { student:'', dept:'', hospital:'', search:'' };
 let charts = {};
 
-// تحليل الـ CSV مع دعم جميع مسميات الأعمدة العربية والإنجليزية
-function parseCSV(text) {
-  const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
-  if (lines.length < 2) return [];
+function parseJSONData(rows) {
+  if (!rows || rows.length < 2) return [];
 
-  const parseLine = line => {
-    let res = [], cur = '', inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      let c = line[i];
-      if (c === '"' && line[i+1] === '"') { cur += '"'; i++; }
-      else if (c === '"') { inQ = !inQ; }
-      else if (c === ',' && !inQ) { res.push(cur.trim()); cur = ''; }
-      else { cur += c; }
-    }
-    res.push(cur.trim());
-    return res;
-  };
-
-  const headers = parseLine(lines[0]).map(h => h.trim().toLowerCase());
+  const headers = rows[0].map(h => String(h).trim().toLowerCase());
 
   const getColIdx = (possibleNames) => {
     return headers.findIndex(h => possibleNames.some(name => h.includes(name.toLowerCase())));
@@ -280,21 +264,21 @@ function parseCSV(text) {
   const idxHours = getColIdx(['hours', 'ساعات', 'الساعات']);
   const idxAct = getColIdx(['activity', 'حالات', 'إجراءات', 'اجراءات']);
 
-  return lines.slice(1).map((line, idx) => {
-    const row = parseLine(line);
-    const getVal = (i) => (i !== -1 && row[i]) ? row[i] : '';
+  return rows.slice(1).map((row, idx) => {
+    const getVal = (i) => (i !== -1 && row[i] !== undefined) ? String(row[i]).trim() : '';
     const getNum = (i) => parseFloat(getVal(i)) || 0;
 
     let student = getVal(idxStudent) || row[1] || 'غير محدد';
     let hospital = getVal(idxHospital) || row[2] || 'غير محدد';
     let dept = getVal(idxDept) || row[3] || 'عام';
     let date = getVal(idxDate) || row[0] || '';
+    if(date.includes('T')) date = date.split('T')[0];
+    
     let timeIn = getVal(idxIn) || '00:00';
     let timeOut = getVal(idxOut) || '00:00';
     let hours = getNum(idxHours);
     let activity = getNum(idxAct);
 
-    // حساب الساعات تلقائياً إذا كانت 0
     if (hours === 0 && timeIn !== '00:00' && timeOut !== '00:00') {
       let [h1, m1] = timeIn.split(':').map(Number);
       let [h2, m2] = timeOut.split(':').map(Number);
@@ -310,29 +294,17 @@ function parseCSV(text) {
 }
 
 async function loadData() {
-  const proxies = [
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(SHEET_CSV_URL)}`,
-    `https://corsproxy.io/?${encodeURIComponent(SHEET_CSV_URL)}`,
-    SHEET_CSV_URL
-  ];
-
-  let loadedText = null;
-  for (let url of proxies) {
-    try {
-      let res = await fetch(url);
-      if (res.ok) {
-        loadedText = await res.text();
-        if (loadedText && loadedText.length > 20) break;
-      }
-    } catch (e) { console.warn("محاولة فاشلة لجلب البيانات عبر:", url); }
-  }
-
-  if (loadedText) {
-    RECORDS = parseCSV(loadedText);
+  try {
+    let res = await fetch(SCRIPT_URL);
+    if (!res.ok) throw new Error("HTTP Status " + res.status);
+    let rows = await res.json();
+    
+    RECORDS = parseJSONData(rows);
     populateFilters();
     render();
-  } else {
-    document.getElementById('periodLabel').textContent = 'خطأ في جلب البيانات';
+  } catch (err) {
+    console.error("خطأ في التحميل:", err);
+    document.getElementById('periodLabel').textContent = 'تعذر جلب البيانات';
   }
 }
 
@@ -342,6 +314,10 @@ function populateFilters(){
   const hospSel = document.getElementById('fHospital');
   
   const getUnique = (key) => [...new Set(RECORDS.map(r=>r[key]).filter(Boolean))].sort();
+
+  studentSel.innerHTML = '<option value="">كل الأطباء</option>';
+  deptSel.innerHTML = '<option value="">كل الأقسام</option>';
+  hospSel.innerHTML = '<option value="">كل المستشفيات</option>';
 
   getUnique('student').forEach(s => studentSel.innerHTML += `<option value="${s}">${s}</option>`);
   getUnique('dept').forEach(d => deptSel.innerHTML += `<option value="${d}">${d}</option>`);
@@ -364,17 +340,15 @@ function filteredRecords(){
 function render(){
   const data = filteredRecords();
   
-  // Stats
-  document.getElementById('statSubmissions').textContent = data.length;
-  document.getElementById('statStudents').textContent = [...new Set(data.map(r=>r.student))].length;
-  document.getElementById('statHours').textContent = Math.round(data.reduce((s,r)=>s+r.hours,0));
-  document.getElementById('statActivity').textContent = Math.round(data.reduce((s,r)=>s+r.activity,0));
+  document.getElementById('statSubmissions').textContent = data.length.toLocaleString('ar');
+  document.getElementById('statStudents').textContent = [...new Set(data.map(r=>r.student))].length.toLocaleString('ar');
+  document.getElementById('statHours').textContent = Math.round(data.reduce((s,r)=>s+r.hours,0)).toLocaleString('ar');
+  document.getElementById('statActivity').textContent = Math.round(data.reduce((s,r)=>s+r.activity,0)).toLocaleString('ar');
   
   if(data.length) {
     document.getElementById('periodLabel').textContent = `${data[0].date || ''} - ${data[data.length-1].date || ''}`;
   }
 
-  // Table
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = data.map(r => `
     <tr>
@@ -395,7 +369,6 @@ function render(){
 function renderCharts(data) {
   Object.values(charts).forEach(c => c && c.destroy());
 
-  // Chart 1: Students
   const students = [...new Set(data.map(r=>r.student))];
   const hoursPerStudent = students.map(s => data.filter(r=>r.student===s).reduce((sum,r)=>sum+r.hours,0));
   
@@ -405,7 +378,6 @@ function renderCharts(data) {
     options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
   });
 
-  // Chart 2: Depts
   const depts = [...new Set(data.map(r=>r.dept))];
   const hoursPerDept = depts.map(d => data.filter(r=>r.dept===d).reduce((sum,r)=>sum+r.hours,0));
 
