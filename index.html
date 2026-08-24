@@ -103,10 +103,29 @@ function clean(val) {
   if (val === null || val === undefined) return '';
   let str = String(val).trim();
   try {
-    // فك التشفير في حال وجود رموز مثل %20
     str = decodeURIComponent(str);
   } catch(e) {}
-  return str.replace(/%20/g, ' ');
+  return str.replace(/%20/g, ' ').replace(/\+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// قاموس تصحيح الأسماء عند الحاجة
+const NAME_MAPPING = {
+  "احمد": "أحمد المهدي بالحاج",
+  "عمر": "عمر صالح عمر",
+  "جلال": "جلال عز الدين الطيب الزاوي",
+  "خالد": "خالد نصر القاضي"
+};
+
+function formatStudentName(rawName) {
+  let cleaned = clean(rawName);
+  if (!cleaned) return 'طالب غير مسجل';
+  
+  for (let key in NAME_MAPPING) {
+    if (cleaned.toLowerCase().includes(key.toLowerCase())) {
+      return NAME_MAPPING[key];
+    }
+  }
+  return cleaned;
 }
 
 function parseTime(val) {
@@ -127,7 +146,7 @@ function calculateDurationMinutes(tIn, tOut) {
   let [h2, m2] = tOut.split(':').map(Number);
   if (isNaN(h1) || isNaN(h2)) return 0;
   let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
-  if (diff <= 0) diff += 1440; // في حال تجاوز منتصف الليل
+  if (diff <= 0) diff += 1440; 
   return diff;
 }
 
@@ -148,31 +167,28 @@ function getWeekLabel(dateStr) {
 function handleJSONPResponse(data) {
   if (!data || !Array.isArray(data) || data.length < 2) return;
 
-  let headers = data[0].map(h => clean(h).toLowerCase());
-  let findIdx = (keys) => headers.findIndex(h => keys.some(k => h.includes(k.toLowerCase())));
-
-  let iStudent = findIdx(['اسم الطبيب', 'الطبيب', 'اسم الطالب', 'طالب', 'متدرب', 'student', 'name']);
-  let iDept = findIdx(['القسم', 'التخصص', 'dept', 'department']);
-  let iHosp = findIdx(['المستشفى', 'الجهة', 'hosp', 'hospital', 'مكان']);
-  let iDate = findIdx(['التاريخ', 'date', 'يوم']);
-  let iIn = findIdx(['حضور', 'وقت الحضور', 'time_in', 'in', 'بداية']);
-  let iOut = findIdx(['انصراف', 'وقت الانصراف', 'time_out', 'out', 'نهاية']);
-  let iAct = findIdx(['الحالات', 'الإجراءات', 'اجراءات', 'act', 'عدد']);
+  const COL_STUDENT = 3; // العمود D (اسم الطالب)
+  const COL_DEPT = 2;    
+  const COL_Hosp = 1;    
+  const COL_DATE = 4;
+  const COL_IN = 5;
+  const COL_OUT = 6;
+  const COL_ACT = 7;
 
   RAW_DATA = data.slice(1).map((r, idx) => {
-    let student = clean(r[iStudent !== -1 ? iStudent : 1]) || clean(r[0]) || `طالب ${idx + 1}`;
-    let dept = clean(r[iDept !== -1 ? iDept : 2]) || 'طوارئ';
-    let hosp = clean(r[iHosp !== -1 ? iHosp : 3]) || 'مستشفى الحوادث أبو سليم';
-    let date = parseDate(r[iDate !== -1 ? iDate : 4]);
-    let tIn = parseTime(r[iIn !== -1 ? iIn : 5]);
-    let tOut = parseTime(r[iOut !== -1 ? iOut : 6]);
+    let student = formatStudentName(r[COL_STUDENT] !== undefined ? r[COL_STUDENT] : r[0]);
+    let dept = clean(r[COL_DEPT]) || 'طوارئ';
+    let hosp = clean(r[COL_Hosp]) || 'مستشفى الحوادث أبو سليم';
+    let date = parseDate(r[COL_DATE]);
+    let tIn = parseTime(r[COL_IN]);
+    let tOut = parseTime(r[COL_OUT]);
     
     let totalMins = calculateDurationMinutes(tIn, tOut);
     let hoursDecimal = Math.round((totalMins / 60) * 10) / 10;
-    let act = parseFloat(clean(r[iAct !== -1 ? iAct : 7])) || 0;
+    let act = parseFloat(clean(r[COL_ACT])) || 0;
 
     return { student, dept, hosp, date, tIn, tOut, totalMins, hours: hoursDecimal, act };
-  }).filter(r => r.student !== '' && !r.student.includes('طالب 100') && r.student.length > 2);
+  }).filter(r => r.student !== '' && !r.student.includes('طالب 100'));
 
   initFilters();
   render();
