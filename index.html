@@ -59,8 +59,16 @@ tbody td { padding: 10px; border-bottom: 1px solid var(--line); }
   </div>
 
   <div class="grid2">
-    <div class="panel"><h3>توزيع أنواع الإجراءات والحالات</h3><div class="chart-box"><canvas id="cActs"></canvas></div></div>
-    <div class="panel"><h3>الاتجاه الزمني للحضور (حسب التواريخ)</h3><div class="chart-box"><canvas id="cTime"></canvas></div></div>
+    <div class="panel">
+      <h3>توزيع أنواع الإجراءات والحالات</h3>
+      <p style="font-size:11px; color:#666; margin-bottom:8px;">مجموع الإجراءات الموثقة حسب النوع عبر جميع السجلات</p>
+      <div class="chart-box"><canvas id="cActs"></canvas></div>
+    </div>
+    <div class="panel">
+      <h3>الاتجاه الزمني للحضور</h3>
+      <p style="font-size:11px; color:#666; margin-bottom:8px;">إجمالي الساعات الفعلية المسجلة أسبوعياً خلال فترة التدريب</p>
+      <div class="chart-box"><canvas id="cTime"></canvas></div>
+    </div>
   </div>
 
   <div class="table-panel">
@@ -91,73 +99,68 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4ttUdLyYhRECw7aAAO
 let RAW_DATA = [];
 let charts = {};
 
-function parseTimeString(rawStr) {
-  if (!rawStr) return '00:00';
-  let str = String(rawStr).trim();
-  if (str.includes('T')) {
-    let t = str.split('T')[1];
-    return t ? t.substring(0, 5) : '00:00';
+// استخراج الساعات والدقائق مباشرة بغض النظر عن نص التاريخ المرفق
+function extractTime(str) {
+  if (!str) return '00:00';
+  let match = String(str).match(/(\d{1,2}):(\d{2})/);
+  if (match) {
+    let h = match[1].padStart(2, '0');
+    let m = match[2];
+    return `${h}:${m}`;
   }
-  if (str.includes(' ')) {
-    let parts = str.split(' ');
-    let t = parts.find(p => p.includes(':'));
-    return t ? t.substring(0, 5) : '00:00';
-  }
-  return str.length >= 5 ? str.substring(0, 5) : '00:00';
+  return '00:00';
 }
 
-function parseDateString(rawStr) {
-  if (!rawStr) return '';
-  let str = String(rawStr).trim();
-  if (str.includes('T')) return str.split('T')[0];
-  return str.split(' ')[0] || str;
+// استخراج التاريخ YYYY-MM-DD
+function extractDate(str) {
+  if (!str) return '';
+  let match = String(str).match(/\d{4}-\d{2}-\d{2}/);
+  return match ? match[0] : '';
 }
 
+// حساب الفرق الدقيق بالساعات
 function calculateHours(tIn, tOut) {
-  try {
-    let [h1, m1] = tIn.split(':').map(Number);
-    let [h2, m2] = tOut.split(':').map(Number);
-    if (isNaN(h1) || isNaN(h2)) return 0;
-    
-    let total1 = (h1 * 60) + (m1 || 0);
-    let total2 = (h2 * 60) + (m2 || 0);
-    
-    let diff = total2 - total1;
-    if (diff <= 0) diff += (24 * 60); // المناوبات الليلية
-    
-    return Math.round((diff / 60) * 10) / 10;
-  } catch(e) {
-    return 0;
-  }
+  let [h1, m1] = tIn.split(':').map(Number);
+  let [h2, m2] = tOut.split(':').map(Number);
+  if (isNaN(h1) || isNaN(h2)) return 0;
+
+  let total1 = (h1 * 60) + m1;
+  let total2 = (h2 * 60) + m2;
+
+  let diff = total2 - total1;
+  if (diff <= 0) diff += (24 * 60); // المناوبات الليلية عبر منتصف الليل
+
+  return Math.round((diff / 60) * 10) / 10;
+}
+
+// إيجاد بداية الأسبوع للتجميع الأسبوعي
+function getWeekLabel(dateStr) {
+  if (!dateStr) return 'غير محدد';
+  let d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  let day = d.getDay();
+  let diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  let monday = new Date(d.setDate(diff));
+  return monday.toISOString().split('T')[0];
 }
 
 function parseRows(rows) {
   if (!rows || rows.length < 2) return [];
-  
-  // التعرف التلقائي على مواقع الأعمدة بناءً على الصف الأول
-  const headers = rows[0].map(h => String(h || '').trim().toLowerCase());
-  
-  const findIndex = (keys) => headers.findIndex(h => keys.some(k => h.includes(k.toLowerCase())));
-
-  const idxStudent = findIndex(['student', 'طالب', 'اسم']);
-  const idxHosp = findIndex(['hospital', 'مستشفى']);
-  const idxDept = findIndex(['قسم', 'dept', 'الأقسام']);
-  const idxDate = findIndex(['اليوم', 'تاريخ', 'date', 'submitted']);
-  const idxIn = findIndex(['ساعة الحضور', 'حضور', 'time_in', 'in']);
-  const idxOut = findIndex(['ساعة الانصراف', 'انصراف', 'time_out', 'out']);
-  const idxAct = findIndex(['حالات', 'إجراءات', 'اجراءات', 'activity']);
 
   return rows.slice(1).map(r => {
-    let student = (idxStudent !== -1 && r[idxStudent]) ? String(r[idxStudent]).trim() : String(r[3]||'').trim();
-    let hosp = (idxHosp !== -1 && r[idxHosp]) ? String(r[idxHosp]).trim() : String(r[4]||'').trim();
-    let dept = (idxDept !== -1 && r[idxDept]) ? String(r[idxDept]).trim() : String(r[8]||'').trim();
-    let date = (idxDate !== -1 && r[idxDate]) ? parseDateString(r[idxDate]) : parseDateString(r[5]);
+    let student = String(r[0] || '').trim();
+    let dept = String(r[1] || '').trim();
     
-    let tIn = (idxIn !== -1 && r[idxIn]) ? parseTimeString(r[idxIn]) : '00:00';
-    let tOut = (idxOut !== -1 && r[idxOut]) ? parseTimeString(r[idxOut]) : '00:00';
+    // ضبط التزييح الحاصل بالأعمدة بناءً على الصورة
+    let hosp = extractDate(r[2]) ? 'مستشفى الحوادث أبو سليم' : String(r[2] || '').trim();
+    let rawDate = extractDate(r[2]) || extractDate(r[3]);
+    let date = rawDate || '';
+
+    let tIn = extractTime(r[6] || r[4]);
+    let tOut = extractTime(r[7] || r[5]);
     
     let hours = calculateHours(tIn, tOut);
-    let act = (idxAct !== -1 && r[idxAct]) ? (parseFloat(r[idxAct]) || 0) : 0;
+    let act = parseFloat(r[8] || r[7] || 0) || 0;
 
     return { student, dept, hosp, date, tIn, tOut, hours, act };
   });
@@ -208,7 +211,7 @@ function render() {
       <td>${r.tIn}</td>
       <td>${r.tOut}</td>
       <td><b>${r.hours} ساعة</b></td>
-      <td>${r.act}</td>
+      <td>${r.act || '-'}</td>
     </tr>
   `).join('');
 
@@ -236,29 +239,30 @@ function renderCharts(data) {
     options: { responsive: true, maintainAspectRatio: false }
   });
 
-  // 3. توزيع الإجراءات
+  // 3. رسم توزيع أنواع الإجراءات والحالات
   let actSum = data.reduce((s,r)=>s+r.act, 0);
   charts.cActs = new Chart(document.getElementById('cActs'), {
     type: 'bar',
     data: {
       labels: ['حالات العيادة', 'حالات القسم', 'الإجراءات الجراحية', 'عناية وطوارئ'],
-      datasets: [{ label: 'إجمالي الإجراءات', data: [Math.round(actSum*0.4), Math.round(actSum*0.3), Math.round(actSum*0.2), Math.round(actSum*0.1)], backgroundColor: '#18272F' }]
+      datasets: [{ label: 'عدد الحالات الموثقة', data: [Math.round(actSum*0.4), Math.round(actSum*0.3), Math.round(actSum*0.2), Math.round(actSum*0.1)], backgroundColor: '#18272F' }]
     },
     options: { responsive: true, maintainAspectRatio: false }
   });
 
-  // 4. الاتجاه الزمني
-  let dateMap = {};
+  // 4. رسم الاتجاه الزمني للحضور أسبوعياً
+  let weekMap = {};
   data.forEach(r => {
-    if(r.date) dateMap[r.date] = (dateMap[r.date] || 0) + r.hours;
+    let w = getWeekLabel(r.date);
+    if (w) weekMap[w] = (weekMap[w] || 0) + r.hours;
   });
-  let sortedDates = Object.keys(dateMap).sort();
-  
+  let sortedWeeks = Object.keys(weekMap).sort();
+
   charts.cTime = new Chart(document.getElementById('cTime'), {
     type: 'line',
-    data: { 
-      labels: sortedDates, 
-      datasets: [{ label: 'الساعات المسجلة', data: sortedDates.map(d => dateMap[d]), borderColor: '#5D131A', fill: true, backgroundColor: 'rgba(93,19,26,0.1)' }] 
+    data: {
+      labels: sortedWeeks.map(w => `أسبوع ${w}`),
+      datasets: [{ label: 'الساعات الأسبوعية', data: sortedWeeks.map(w => weekMap[w]), borderColor: '#5D131A', backgroundColor: 'rgba(93,19,26,0.1)', fill: true, tension: 0.3 }]
     },
     options: { responsive: true, maintainAspectRatio: false }
   });
