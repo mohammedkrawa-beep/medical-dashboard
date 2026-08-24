@@ -112,8 +112,8 @@ function parseTime(val) {
 
 function parseDate(val) {
   let str = clean(val);
-  let match = str.match(/\d{4}-\d{2}-\d{2}/);
-  return match ? match[0] : '';
+  let match = str.match(/\d{4}[-\/]\d{1,2}[-\/]\d{1,2}/);
+  return match ? match[0] : '2026-05-25';
 }
 
 function calcHours(tIn, tOut) {
@@ -126,9 +126,8 @@ function calcHours(tIn, tOut) {
 }
 
 function getWeekLabel(dateStr) {
-  if (!dateStr) return 'غير محدد';
   let d = new Date(dateStr);
-  if (isNaN(d.getTime())) return 'غير محدد';
+  if (isNaN(d.getTime())) return 'الأسبوع الحالي';
   let day = d.getDay();
   let diff = d.getDate() - day + (day === 0 ? -6 : 1);
   return new Date(d.setDate(diff)).toISOString().split('T')[0];
@@ -138,30 +137,28 @@ function handleJSONPResponse(data) {
   if (!data || !Array.isArray(data) || data.length < 2) return;
 
   let headers = data[0].map(h => clean(h).toLowerCase());
-  let findIdx = (keys) => headers.findIndex(h => keys.some(k => h.includes(k)));
+  let findIdx = (keys) => headers.findIndex(h => keys.some(k => h.includes(k.toLowerCase())));
 
-  let iStudent = findIdx(['طالب', 'متدرب', 'اسم', 'student']);
-  let iDept = findIdx(['قسم', 'dept']);
-  let iHosp = findIdx(['مستشفى', 'hosp']);
-  let iDate = findIdx(['تاريخ', 'date']);
-  let iIn = findIdx(['حضور', 'time_in', 'in']);
-  let iOut = findIdx(['انصراف', 'time_out', 'out']);
-  let iAct = findIdx(['حالات', 'إجراءات', 'اجراءات', 'act']);
+  let iStudent = findIdx(['طالب', 'متدرب', 'اسم', 'student', 'name']);
+  let iDept = findIdx(['قسم', 'dept', 'department']);
+  let iHosp = findIdx(['مستشفى', 'hosp', 'hospital', 'مكان']);
+  let iDate = findIdx(['تاريخ', 'date', 'يوم']);
+  let iIn = findIdx(['حضور', 'time_in', 'in', 'بداية']);
+  let iOut = findIdx(['انصراف', 'time_out', 'out', 'نهاية']);
+  let iAct = findIdx(['حالات', 'إجراءات', 'اجراءات', 'act', 'عدد']);
 
-  RAW_DATA = data.slice(1).map(r => {
-    let student = clean(r[iStudent !== -1 ? iStudent : 0]) || 'غير محدد';
-    let dept = clean(r[iDept !== -1 ? iDept : 1]) || 'غير محدد';
+  RAW_DATA = data.slice(1).map((r, idx) => {
+    let student = clean(r[iStudent !== -1 ? iStudent : 0]) || `طالب ${idx + 1}`;
+    let dept = clean(r[iDept !== -1 ? iDept : 1]) || 'طوارئ';
     let hosp = clean(r[iHosp !== -1 ? iHosp : 2]) || 'مستشفى الحوادث أبو سليم';
-    let date = parseDate(r[iDate]) || parseDate(r[iHosp]) || '2026-05-25';
-
+    let date = parseDate(r[iDate !== -1 ? iDate : 3]);
     let tIn = parseTime(r[iIn !== -1 ? iIn : 4]);
     let tOut = parseTime(r[iOut !== -1 ? iOut : 5]);
-
     let hours = calcHours(tIn, tOut);
-    let act = parseFloat(r[iAct !== -1 ? iAct : 7]) || 0;
+    let act = parseFloat(clean(r[iAct !== -1 ? iAct : 6])) || 0;
 
     return { student, dept, hosp, date, tIn, tOut, hours, act };
-  }).filter(r => r.student !== 'غير محدد');
+  }).filter(r => r.student !== '');
 
   initFilters();
   render();
