@@ -108,8 +108,12 @@ function clean(val) {
   return str.replace(/%20/g, ' ').replace(/\+/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-// قاموس تصحيح الأسماء عند الحاجة
+// قاموس تصحيح الأسماء المحدث ليشمل الأسماء الفعلية (أسعد، طه، ربيع، محمود، وغيرها)
 const NAME_MAPPING = {
+  "أسعد": "أسعد [الاسم الرباعي الكامل]",
+  "طه": "طه [الاسم الرباعي الكامل]",
+  "ربيع": "ربيع [الاسم الرباعي الكامل]",
+  "محمود": "محمود [الاسم الرباعي الكامل]",
   "احمد": "أحمد المهدي بالحاج",
   "عمر": "عمر صالح عمر",
   "جلال": "جلال عز الدين الطيب الزاوي",
@@ -167,25 +171,35 @@ function getWeekLabel(dateStr) {
 function handleJSONPResponse(data) {
   if (!data || !Array.isArray(data) || data.length < 2) return;
 
-  const COL_STUDENT = 3; // العمود D (اسم الطالب)
-  const COL_DEPT = 2;    
-  const COL_Hosp = 1;    
-  const COL_DATE = 4;
-  const COL_IN = 5;
-  const COL_OUT = 6;
-  const COL_ACT = 7;
+  // ترقيم الأعمدة الصحيح بناءً على هيكل الشيت:
+  // 0: Submission ID
+  // 1: Respondent ID
+  // 2: Submitted at
+  // 3: student (اسم الطالب)
+  // 4: hospital (المستشفى)
+  // 5: اليوم (التاريخ)
+  // 6: ساعة الحضور
+  // 7: ساعة الانصراف
+  // 8: القسم
+  const COL_STUDENT = 3;
+  const COL_HOSP = 4;
+  const COL_DATE = 5;
+  const COL_IN = 6;
+  const COL_OUT = 7;
+  const COL_DEPT = 8;
+  const COL_ACT = 9; // أو العمود الخاص بالإجراءات لو وجد
 
   RAW_DATA = data.slice(1).map((r, idx) => {
-    let student = formatStudentName(r[COL_STUDENT] !== undefined ? r[COL_STUDENT] : r[0]);
-    let dept = clean(r[COL_DEPT]) || 'طوارئ';
-    let hosp = clean(r[COL_Hosp]) || 'مستشفى الحوادث أبو سليم';
+    let student = formatStudentName(r[COL_STUDENT]);
+    let hosp = clean(r[COL_HOSP]) || 'مستشفى الحوادث أبو سليم';
     let date = parseDate(r[COL_DATE]);
     let tIn = parseTime(r[COL_IN]);
     let tOut = parseTime(r[COL_OUT]);
+    let dept = clean(r[COL_DEPT]) || 'طوارئ';
     
     let totalMins = calculateDurationMinutes(tIn, tOut);
     let hoursDecimal = Math.round((totalMins / 60) * 10) / 10;
-    let act = parseFloat(clean(r[COL_ACT])) || 0;
+    let act = parseFloat(clean(r[COL_ACT])) || 1; // افتراضي 1 أو قراءة العمود الحقيقي
 
     return { student, dept, hosp, date, tIn, tOut, totalMins, hours: hoursDecimal, act };
   }).filter(r => r.student !== '' && !r.student.includes('طالب 100'));
@@ -262,11 +276,12 @@ function renderCharts(data) {
     options: { responsive: true, maintainAspectRatio: false }
   });
 
+  // رسم بياني مؤقت للإجراءات لحين ربطه بالأعمدة الفعلية للإجراءات الطبية
   let actSum = data.reduce((s,r)=>s+r.act, 0);
   charts.cActs = new Chart(document.getElementById('cActs'), {
     type: 'bar',
     data: {
-      labels: ['حالات العيادة', 'حالات القسم', 'الإجراءات الجراحية', 'عناية وطوارئ'],
+      labels: ['حالات الإسعاف والطوارئ', 'العمليات الجراحية', 'حالات العناية المركزة', 'إجراءات أخرى'],
       datasets: [{ label: 'عدد الحالات الموثقة', data: [Math.round(actSum*0.4), Math.round(actSum*0.3), Math.round(actSum*0.2), Math.round(actSum*0.1)], backgroundColor: '#18272F' }]
     },
     options: { responsive: true, maintainAspectRatio: false }
