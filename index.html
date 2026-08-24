@@ -690,7 +690,58 @@ function wireEvents(){
 
 populateFilters();
 wireEvents();
+// 1. دالة جلب البيانات مع معالجة رابط Google Sheets
+async function loadData() {
+  try {
+    let cleanUrl = SHEET_CSV_URL.trim();
+    if (!cleanUrl.includes('output=csv')) {
+      cleanUrl = cleanUrl.replace(/\/edit.*$/, '/export?format=csv');
+    }
+
+    const response = await fetch(cleanUrl);
+    if (!response.ok) {
+      throw new Error(`خطأ في الاستجابة: ${response.status}`);
+    }
+
+    const text = await response.text();
+    RECORDS = parseCSV(text);
+
+    populateFilters();
+    render();
+  } catch (err) {
+    console.error("تعذر جلب البيانات:", err);
+  }
+}
+
+// 2. دالة ربط الأحداث والفلترة
+function wireEvents(){
+  document.getElementById('fStudent').addEventListener('change', e=>{ state.student=e.target.value; destroyCharts(); render(); });
+  document.getElementById('fDept').addEventListener('change', e=>{ state.dept=e.target.value; destroyCharts(); render(); });
+  document.getElementById('fHospital').addEventListener('change', e=>{ state.hospital=e.target.value; destroyCharts(); render(); });
+  document.getElementById('tableSearch').addEventListener('input', e=>{ state.search=e.target.value; renderTable(filteredRecords()); });
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    state = { student:'', dept:'', hospital:'', search:'', sortKey:'date', sortDir:'asc' };
+    document.getElementById('fStudent').value='';
+    document.getElementById('fDept').value='';
+    document.getElementById('fHospital').value='';
+    document.getElementById('tableSearch').value='';
+    destroyCharts(); render();
+  });
+  document.querySelectorAll('#dataTable thead th[data-key]').forEach(th=>{
+    th.style.cursor='pointer';
+    th.addEventListener('click', ()=>{
+      const key = th.dataset.key;
+      if(state.sortKey === key){ state.sortDir = state.sortDir==='asc' ? 'desc' : 'asc'; }
+      else { state.sortKey = key; state.sortDir = 'asc'; }
+      renderTable(filteredRecords());
+    });
+  });
+}
+
+// 3. التنفيذ المباشر عند فتح الصفحة (في السطرين الأخيرين تماماً)
+wireEvents();
 loadData();
+</script>
 </script>
 </body>
 </html>
