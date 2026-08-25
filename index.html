@@ -7,66 +7,76 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root{--maroon:#5D131A;--maroon-dark:#420D12;--gold:#C0A046;--gold-light:#DCC788;--teal:#18272F;--teal-soft:#233A45;--cream:#E7E6E3;--white:#fff;--line:#DEDAD2}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--cream);font-family:'IBM Plex Sans Arabic',sans-serif;color:#1D2224}
-.topbar{background:linear-gradient(135deg,var(--maroon),var(--maroon-dark));color:#fff;border-bottom:4px solid var(--gold);padding:24px 32px}
-.topbar h1{font-family:Cairo,sans-serif;font-size:26px}
-.wrap{max-width:1450px;margin:0 auto;padding:24px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
-.stat-card{background:#fff;border-radius:12px;padding:18px;border:1px solid var(--line);border-right:4px solid var(--gold)}
-.stat-card .val{font-size:28px;font-weight:800;color:var(--maroon);font-family:Cairo}
-.filterbar{background:var(--teal);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:end;margin-bottom:24px;flex-wrap:wrap}
-.filterbar .field{min-width:150px}.filterbar label{color:var(--gold-light);font-size:12px;display:block;margin-bottom:5px}
-select,input{background:var(--teal-soft);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:9px 12px;width:100%}
-input[type=date]{color-scheme:dark}
-.search{min-width:240px;flex:1}
-.btn{border:0;border-radius:7px;padding:10px 15px;cursor:pointer;font-family:inherit;font-weight:700}
-.btn-primary{background:var(--gold);color:#18272F}.btn-light{background:#fff;color:var(--teal)}.btn-danger{background:#eee;color:var(--maroon)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
-.panel,.table-panel{background:#fff;border-radius:12px;padding:18px;border:1px solid var(--line)}
-.chart-box{position:relative;height:280px}
-.table-panel{padding:20px;margin-bottom:24px}
-.table-wrap{overflow:auto;max-height:620px}
-table{width:100%;border-collapse:collapse;font-size:13px;text-align:right;min-width:1000px}
-thead th{background:var(--teal);color:var(--gold-light);padding:10px;position:sticky;top:0;z-index:1}
-tbody td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-tbody tr:hover{background:#f8f7f4}
-.badge{display:inline-block;padding:4px 8px;border-radius:20px;background:#eee;font-size:12px}
-.section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
-.detail-list{display:flex;flex-wrap:wrap;gap:6px}
-.detail{background:#f5f3ed;border:1px solid var(--line);border-radius:7px;padding:5px 8px;font-size:12px}
-.detail b{color:var(--maroon)}
-.empty{padding:35px;text-align:center;color:#777}
-.print-only{display:none}
-@media(max-width:900px){.stats{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}.wrap{padding:12px}}
-@media print{
-  @page{size:A4 landscape;margin:10mm}
-  body{background:#fff}
-  .topbar{padding:12px 18px}
-  .wrap{max-width:none;padding:10px}
-  .filterbar,.no-print,.grid2{display:none!important}
-  .stats{grid-template-columns:repeat(4,1fr);margin-bottom:12px}
-  .stat-card{padding:8px}
-  .stat-card .val{font-size:18px}
-  .table-panel{border:0;padding:0}
-  .table-wrap{max-height:none;overflow:visible}
-  table{min-width:0;font-size:9px}
-  thead th{position:static;padding:5px}
-  tbody td{padding:5px}
-  .print-only{display:block}
-  .print-title{font-size:18px;font-weight:800;margin-bottom:4px}
-  .print-meta{font-size:10px;margin-bottom:10px}
+:root {
+  --maroon: #5D131A; --maroon-dark: #420D12; --gold: #C0A046; --gold-light: #DCC788;
+  --teal: #18272F; --teal-soft: #233A45; --cream: #E7E6E3; --white: #FFFFFF; --line: #DEDAD2;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--cream); font-family: 'IBM Plex Sans Arabic', sans-serif; color: #1D2224; }
+.topbar { background: linear-gradient(135deg, var(--maroon), var(--maroon-dark)); color: var(--white); border-bottom: 4px solid var(--gold); padding: 24px 32px; }
+.topbar h1 { font-family: 'Cairo', sans-serif; font-size: 26px; }
+.wrap { max-width: 1320px; margin: 0 auto; padding: 24px; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: var(--white); border-radius: 12px; padding: 18px; border: 1px solid var(--line); border-right: 4px solid var(--gold); }
+.stat-card .val { font-size: 28px; font-weight: 800; color: var(--maroon); font-family: 'Cairo'; }
+.filterbar { background: var(--teal); border-radius: 12px; padding: 16px; display: flex; gap: 12px; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; }
+.filterbar label { color: var(--gold-light); font-size: 12px; display: block; margin-bottom: 4px; }
+select, input { background: var(--teal-soft); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 8px 12px; font-family: 'IBM Plex Sans Arabic', sans-serif; }
+input#fSearch { background: #fff; color: #000; min-width: 220px; }
+.btn-print { background: var(--gold); color: var(--maroon-dark); border: none; border-radius: 6px; padding: 9px 18px; font-weight: 700; cursor: pointer; font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 13px; }
+.btn-print:hover { filter: brightness(1.08); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+.panel { background: var(--white); border-radius: 12px; padding: 18px; border: 1px solid var(--line); }
+.chart-box { position: relative; height: 280px; }
+.table-panel { background: var(--white); border-radius: 12px; padding: 20px; border: 1px solid var(--line); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: right; }
+thead th { background: var(--teal); color: var(--gold-light); padding: 10px; }
+tbody td { padding: 10px; border-bottom: 1px solid var(--line); }
+
+.detail-toggle { background: var(--teal); color: var(--gold-light); border: none; border-radius: 6px; padding: 6px 10px; font-size: 12px; cursor: pointer; }
+.detail-toggle:hover { filter: brightness(1.2); }
+.detail-row td { background: #faf9f7; font-size: 12.5px; line-height: 1.9; }
+
+/* لوحة الأسماء التي تحتاج مطابقة يدوية */
+#unmatchedPanel { border-right: 4px solid #b23b3b; margin-bottom: 24px; }
+#unmatchedPanel h3 { color: #b23b3b; margin-bottom: 6px; }
+#unmatchedPanel p { font-size: 13px; color: #555; margin-bottom: 10px; }
+.unmatched-chip { display: inline-block; background: #f4dede; color: #7a1f1f; padding: 4px 10px; border-radius: 6px; margin: 3px; font-size: 13px; }
+
+/* رأس التقرير وملخص الطلبة — يظهران فقط عند الطباعة */
+.print-header { display: none; }
+.print-only { display: none; }
+.print-student-block { border: 1px solid #ccc; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; }
+.print-student-block h4 { font-family: 'Cairo', sans-serif; color: var(--maroon); margin-bottom: 6px; font-size: 15px; }
+.print-student-block table { font-size: 12px; }
+.print-student-block th, .print-student-block td { padding: 6px 8px; }
+
+@media print {
+  body { background: #fff; }
+  .topbar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .filterbar, #unmatchedPanel, .btn-print, .detail-toggle,
+  .grid2, .table-panel { display: none !important; }
+  .print-header { display: block !important; margin: 14px 0; padding: 12px 16px; border: 1px solid #999; border-radius: 8px; font-size: 13px; background: #f7f6f3; }
+  .print-header p { margin: 2px 0; }
+  .print-only { display: block !important; }
+  .wrap { padding: 12px; }
+  .panel, .stat-card, .print-student-block { break-inside: avoid; border: 1px solid #999; }
+  table { font-size: 11px; }
 }
 </style>
 </head>
 <body>
+
 <div class="topbar">
   <h1>لوحة متابعة برنامج تدريب الأطباء</h1>
   <p>مركز طب الطوارئ والدعم — لجنة متابعة وتقييم الأداء لطلبة الماجستير</p>
 </div>
 
 <div class="wrap">
+
+  <div id="printHeader" class="print-header"></div>
+  <div id="printSummary" class="print-only"></div>
+
   <div class="stats">
     <div class="stat-card"><div>إجمالي السجلات</div><div class="val" id="stCount">0</div></div>
     <div class="stat-card"><div>عدد الأطباء</div><div class="val" id="stDocs">0</div></div>
@@ -74,20 +84,20 @@ tbody tr:hover{background:#f8f7f4}
     <div class="stat-card"><div>إجمالي الحالات/الإجراءات</div><div class="val" id="stActs">0</div></div>
   </div>
 
-  <div class="filterbar no-print">
-    <div class="field"><label>من التاريخ</label><input id="fFrom" type="date" onchange="render()"></div>
-    <div class="field"><label>إلى التاريخ</label><input id="fTo" type="date" onchange="render()"></div>
-    <div class="field"><label>الطبيب المتدرب</label><select id="fDoc" onchange="render()"><option value="">الكل</option></select></div>
-    <div class="field"><label>القسم</label><select id="fDept" onchange="render()"><option value="">الكل</option></select></div>
-    <div class="field"><label>المستشفى</label><select id="fHosp" onchange="render()"><option value="">الكل</option></select></div>
-    <div class="field search"><label>بحث</label><input id="fSearch" placeholder="بحث عن طالب أو مستشفى..." oninput="render()"></div>
-    <button class="btn btn-primary" onclick="resetFilters()">إعادة ضبط</button>
-    <button class="btn btn-light" onclick="window.print()">🖨 طباعة التقرير</button>
+  <div class="filterbar">
+    <div><label>الطبيب المتدرب</label><select id="fDoc" onchange="render()"><option value="">الكل</option></select></div>
+    <div><label>القسم</label><select id="fDept" onchange="render()"><option value="">الكل</option></select></div>
+    <div><label>المستشفى</label><select id="fHosp" onchange="render()"><option value="">الكل</option></select></div>
+    <div><label>من تاريخ</label><input type="date" id="fFrom" onchange="render()"></div>
+    <div><label>إلى تاريخ</label><input type="date" id="fTo" onchange="render()"></div>
+    <div><label>بحث</label><input id="fSearch" placeholder="بحث عن طالب أو مستشفى..." oninput="render()"></div>
+    <button class="btn-print" onclick="printReport()">🖨 طباعة التقرير</button>
   </div>
 
-  <div class="print-only">
-    <div class="print-title">تقرير متابعة تدريب الأطباء</div>
-    <div class="print-meta" id="printMeta"></div>
+  <div class="panel" id="unmatchedPanel" style="display:none;">
+    <h3>⚠ أسماء تحتاج مطابقة يدوية</h3>
+    <p>هذه الأسماء وردت من النموذج ولم تُطابَق تلقائياً بثقة مع قائمة الطلبة الكاملة — إمّا لأنها ناقصة جداً (مثل اسم أول مشترك بين أكثر من طالب) أو غير موجودة بالقائمة أصلاً. تحقق من الاسم وأضِفه لقائمة FULL_STUDENT_LIST أو NAME_MAPPING بأعلى الكود حسب الحاجة.</p>
+    <div id="unmatchedList"></div>
   </div>
 
   <div class="grid2">
@@ -96,18 +106,34 @@ tbody tr:hover{background:#f8f7f4}
   </div>
 
   <div class="grid2">
-    <div class="panel"><h3>الإجراءات/الحالات الفعلية حسب البيانات المدخلة</h3><div class="chart-box"><canvas id="cActs"></canvas></div></div>
-    <div class="panel"><h3>الاتجاه الزمني للحضور</h3><div class="chart-box"><canvas id="cTime"></canvas></div></div>
+    <div class="panel">
+      <h3 id="cActsTitle">توزيع أنواع الإجراءات والحالات</h3>
+      <div class="chart-box"><canvas id="cActs"></canvas></div>
+    </div>
+    <div class="panel">
+      <h3>الاتجاه الزمني للحضور</h3>
+      <div class="chart-box"><canvas id="cTime"></canvas></div>
+    </div>
   </div>
 
   <div class="table-panel">
-    <div class="section-title">
-      <h3>سجل التدريب التفصيلي</h3>
-      <span class="badge" id="resultInfo">0 سجل</span>
-    </div>
-    <div class="table-wrap">
+    <h3>سجل التدريب التفصيلي</h3>
+    <br>
+    <div style="overflow-x:auto;">
       <table>
-        <thead id="tHead"></thead>
+        <thead>
+          <tr>
+            <th>الطالب المتدرب</th>
+            <th>القسم</th>
+            <th>المستشفى</th>
+            <th>التاريخ</th>
+            <th>الحضور</th>
+            <th>الانصراف</th>
+            <th>الساعات الفعلية</th>
+            <th>الحالات</th>
+            <th>تفاصيل</th>
+          </tr>
+        </thead>
         <tbody id="tBody"></tbody>
       </table>
     </div>
@@ -115,218 +141,565 @@ tbody tr:hover{background:#f8f7f4}
 </div>
 
 <script>
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbznPKlPoH9MqT_xbNl2T2HmBneuvIZMuvah0VQE1RK7X59F5_r-3y8V7QqA1hY5FE0CLg/exec";
-let RAW_DATA=[], HEADERS=[], ROW_OBJECTS=[], charts={};
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznPKlPoH9MqT_xbNl2T2HmBneuvIZMuvah0VQE1RK7X59F5_r-3y8V7QqA1hY5FE0CLg/exec";
+let RAW_DATA = [];
+let CURRENT_FILTERED = [];
+let charts = {};
+let UNMATCHED_NAMES = new Set();
+let AUTO_CANON = {};
+let LIVE_HEADERS = [];
 
-const COLS={
-  student:3, hosp:4, date:5, inTime:6, outTime:7, dept:8,
-  er:[9,10,11,12,13,14,15,16,17],
-  surg:Array.from({length:14},(_,i)=>18+i), // S:AF
-  icu:[32,33,34,35,36,38,39] // AG:AK, AM:AN; AL intentionally excluded
+// ==================================================================
+// أسماء كل أعمدة الشيت بالترتيب (فهرسة من 0) — تُستخدم كعناوين في
+// الرسوم البيانية وفي لوحة تفاصيل كل سجل
+// ==================================================================
+const HEADERS = [
+  'Submission ID','Respondent ID','Submitted at','الطالب المتدرب','المستشفى','اليوم',
+  'ساعة الحضور','ساعة الانصراف','القسم',
+  'عدد الحالات',                                          // 9
+  'Intubation / Airway Management (أنبوب تنفس)',          // 10
+  'Central Line Insertion (قسطرة وريدية)',                // 11
+  'Chest Tube Insertion (أنبوب صدر)',                      // 12
+  'Suturing (خياطة جروح)',                                 // 13
+  'Casting / Splinting (تجبير)',                           // 14
+  'Triage / Filter Clinic (قسم الفلترة)',                  // 15
+  'أسماء الحالات',                                          // 16
+  'صور المرور على حالات الطوارئ',                          // 17
+  'Operating Room (يوم العمليات)',                          // 18
+  'نوع المشاركة في العملية',                                // 19
+  'عدد عمليات - النوع 1',                                   // 20
+  'نوع العمليات 1',                                         // 21
+  'أسماء المرضى - عملية 1',                                 // 22
+  'عدد عمليات - النوع 2',                                   // 23
+  'نوع العمليات 2',                                         // 24
+  'أسماء المرضى - عملية 2',                                 // 25
+  'عدد عمليات - النوع 3',                                   // 26
+  'نوع العمليات 3',                                         // 27
+  'أسماء المرضى - عملية 3',                                 // 28
+  'العيادة الخارجية (Outpatient)',                          // 29
+  'الحالات في الجولة على الأقسام (Ward Round)',             // 30
+  'صور جدول الإجراءات العملية',                             // 31
+  'عدد حالات العناية — 1',                                  // 32
+  'عدد حالات العناية — 2',                                  // 33
+  'عدد حالات العناية — 3',                                  // 34
+  'متابعة العناية (ICU Management 24h)',                    // 35
+  'عدد الحالات التي عاينها اليوم (العناية)',                // 36
+  'أسماء مرضى العناية',                                     // 37
+  'الساعات الفعلية المحسوبة',                               // 38
+  'عدد الساعات الفعلية في القسم'                            // 39
+];
+
+// نطاقات أعمدة كل قسم كما هي معتمدة: الإسعاف J:R، الجراحية S:AF،
+// العناية والتخدير AG:AK فقط (تم استثناء AM/AN لأنها ساعات فعلية عامة
+// وليست إجراءات/حالات، وكذلك AL لأنه اسم مريض وليس رقم)
+const DEPT_CONFIG = [
+  { key: 'er',   label: 'قسم الإسعاف',        cols: [9,10,11,12,13,14,15,16,17] },
+  { key: 'surg', label: 'الأقسام الجراحية',    cols: [18,19,20,21,22,23,24,25,26,27,28,29,30,31] },
+  { key: 'icu',  label: 'العناية والتخدير',     cols: [32,33,34,35,36] }
+];
+
+// يرجع اسم العمود كما ورد فعلياً من الشيت (Code.gs يرسل صف العناوين
+// كأول عنصر في البيانات)، ويستعمل القائمة اليدوية أعلاه فقط كاحتياط
+function headerLabel(i) {
+  if (LIVE_HEADERS[i] && LIVE_HEADERS[i].length) return LIVE_HEADERS[i];
+  return HEADERS[i] || `عمود ${i+1}`;
+}
+
+function clean(val) {
+  if (val === null || val === undefined) return '';
+  let str = String(val).trim();
+  try { str = decodeURIComponent(str); } catch(e) {}
+  return str.replace(/%20/g, ' ').replace(/\+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// ==================================================================
+// قائمة مطابقة الأسماء اليدوية — احتياطية فقط لحالات نادرة لا تُحل
+// تلقائياً (مثل لقب مختلف تماماً عن الاسم الرسمي). أغلب حالات الأسماء
+// الناقصة الآن تُحل تلقائياً عبر مطابقة القائمة الكاملة أدناه، فلا
+// داعي لإضافة كل طالب هنا.
+// المفتاح = الاسم كما يظهر (كامل أو ناقص) في نموذج Tally
+// القيمة = الاسم الرسمي الكامل الذي يجب أن يظهر في اللوحة
+// ==================================================================
+const NAME_MAPPING = {
 };
 
-const DEPT_CONFIG=[
-  {key:'er', names:['Emergency Dept - ER','قسم الإسعاف','Emergency Department - ER'], cols:COLS.er},
-  {key:'surg', names:['Surgery - General/Neuro','الأقسام الجراحية','Surgery - General / Neuro'], cols:COLS.surg},
-  {key:'icu', names:['Anesthesia & ICU','التخدير والعناية','Anesthesia & ICU '], cols:COLS.icu}
+// ==================================================================
+// القائمة الكاملة لكل الطلبة المتدربين بالبرنامج (من ملف الإكسل)،
+// وليس فقط من ورد اسمهم فعلاً في الشيت. عدّل هنا كلما التحق/تخرّج
+// طالب. تُستخدم هذه القائمة في أمرين: (1) تعبئة فلتر "الطبيب المتدرب"
+// بكل الطلبة حتى من لم يسجّل حضوراً بعد، و(2) مطابقة أي اسم ناقص يصل
+// من النموذج تلقائياً مع الاسم الكامل الصحيح.
+// ==================================================================
+const FULL_STUDENT_LIST = [
+  "محمد سعد إبراهيم الغزاوي",
+  "أيوب خالد الصغير شوية",
+  "سندس بشير امحمد دردور",
+  "ربيع لطفي محمد العالم",
+  "أحمد رشيد الطاهر الكرماجي",
+  "أسعد عادل المختار اليعقوبي",
+  "وليد محمد سعيد سالم",
+  "جلال عز الدين الطيب الزاوي",
+  "عاصم محمد منصور الشريف",
+  "طه محمد فتح الله الزيادي",
+  "علي الصادق علي جرجبر",
+  "علي إبراهيم اسويسي",
+  "فيصل حسين محمد شلايك",
+  "د. المثنى يحيى عبدالحميد بالخير",
+  "د. حسن عبد الصمد عبدالوهاب مليطان",
+  "خالد اسعد رمضان بن قناد",
+  "مفتاح محمد ناصر مفتاح المهدوي",
+  "عمر صالح عمر اغليو",
+  "خالد نصر القاضي",
+  "أحمد المهدي بالحاج",
+  "محمد محمد التاجوري",
+  "محمود محمد الطاهر بن عياد"
 ];
 
-const KNOWN_STUDENTS=[
-"محمد سعد إبراهيم الغزاوي","أيوب خالد الصغير شوية","سندس بشير امحمد دردور","ربيع لطفي محمد العالم",
-"أحمد رشيد الطاهر الكرماجي","أسعد عادل المختار اليعقوبي","وليد محمد سعيد سالم","جلال عز الدين الطيب الزاوي",
-"عاصم محمد منصور الشريف","طه محمد فتح الله الزيادي","علي الصادق علي جرجبر","علي إبراهيم اسويسي",
-"فيصل حسين محمد شلايك","د. المثنى يحيى عبدالحميد بالخير","د. حسن عبد الصمد عبدالوهاب مليطان",
-"خالد اسعد رمضان بن قناد","مفتاح محمد ناصر مفتاح المهدوي","عمر صالح عمر اغليو","خالد نصر القاضي",
-"أحمد المهدي بالحاج","محمد محمد التاجوري","محمود محمد الطاهر بن عياد"
-];
+// توحيد أشكال الحروف العربية المختلفة (أ إ آ ا) و(ى ي) و(ة ه) وإزالة التشكيل
+// حتى لا تفوت المطابقة بسبب اختلافات كتابة بسيطة قادمة من النموذج
+function normalizeArabic(str) {
+  if (!str) return '';
+  return str
+    .replace(/[إأآا]/g, 'ا')
+    .replace(/ى/g, 'ي')
+    .replace(/ة/g, 'ه')
+    .replace(/[\u064B-\u0652]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
-function clean(v){
-  if(v===null||v===undefined)return '';
-  let s=String(v).replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/[\r\n\t]+/g,' ');
-  try{s=decodeURIComponent(s)}catch(e){}
-  return s.replace(/%20/g,' ').replace(/\+/g,' ').replace(/\s+/g,' ').trim();
+// يقسّم الاسم إلى كلمات بعد التطبيع، ويتجاهل علامات الترقيم (مثل نقطة "د.")
+function tokenize(str) {
+  return normalizeArabic(str).replace(/[.,:؛]/g, '').split(' ').filter(Boolean);
 }
-function normName(v){
-  return clean(v).replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[.،,:;]/g,'').replace(/\s+/g,' ').trim().toLowerCase();
+
+// نجهّز كلمات كل اسم في القائمة الكاملة مرة واحدة فقط
+const ROSTER_TOKENS = FULL_STUDENT_LIST.map(name => ({ name, tokens: tokenize(name) }));
+
+// يطابق اسماً ناقصاً/جزئياً مع القائمة الكاملة عبر مقارنة الكلمات، لا
+// عبر تخمين. يُقبل التطابق فقط إذا كانت كل كلمات الاسم الوارد موجودة
+// ضمن اسم مرشّح واحد، وبدون أي تعادل مع مرشّح آخر — إذا تشارك أكثر من
+// طالب نفس الكلمة الوحيدة الواردة (مثل "خالد" حين يوجد أكثر من خالد
+// بالقائمة)، تُرفض المطابقة تلقائياً بدل تخمين الطالب الخطأ
+function matchRoster(rawTokens) {
+  if (!rawTokens.length) return null;
+  let scored = ROSTER_TOKENS.map(r => {
+    let overlap = rawTokens.filter(t => r.tokens.includes(t)).length;
+    return { name: r.name, overlap };
+  }).filter(s => s.overlap === rawTokens.length); // كل كلمات الاسم الوارد لازم توجد بالمرشح
+
+  if (scored.length === 0) return null;
+  if (scored.length > 1) return null; // أكثر من مرشح مطابق بنفس القوة = التباس، لا تخمين
+  return scored[0].name;
 }
-function escapeHtml(v){
-  return clean(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function formatStudentName(rawName) {
+  let cleaned = clean(rawName);
+  if (!cleaned) return 'طالب غير مسجل';
+  let normalizedCleaned = normalizeArabic(cleaned);
+
+  for (let key in NAME_MAPPING) {
+    let normalizedKey = normalizeArabic(key);
+    let pattern = new RegExp('(^|\\s)' + normalizedKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\s|$)');
+    if (pattern.test(normalizedCleaned)) {
+      return NAME_MAPPING[key];
+    }
+  }
+
+  // مطابقة تلقائية وآمنة مقابل قائمة الطلبة الكاملة (بدون تخمين عند الالتباس)
+  let rosterMatch = matchRoster(tokenize(cleaned));
+  if (rosterMatch) return rosterMatch;
+
+  // لم يتم العثور على مطابقة آمنة: نوحّد تلقائياً أي تكرار لنفس الاسم
+  // مع اختلافات كتابة بسيطة (تشكيل، مسافات، ألف/ياء/تاء مربوطة) بحيث
+  // يظهر كل تكرار بنفس الصيغة المستخدمة أول مرة خلال هذه الجلسة
+  if (AUTO_CANON[normalizedCleaned]) {
+    return AUTO_CANON[normalizedCleaned];
+  }
+
+  AUTO_CANON[normalizedCleaned] = cleaned;
+  UNMATCHED_NAMES.add(cleaned);
+  return cleaned;
 }
-function parseDate(v){
-    const s=clean(v);
-  let m=s.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
-  return m?`${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`:'';
+
+// عدّاد قيم مرن: يحوّل خانات نعم/تم/✓ إلى 1، ويقرأ الأرقام العادية،
+// ويتجاهل الحقول النصية الفارغة (يرجع 0) — يُستخدم لتجميع كل أعمدة القسم
+function numeric(v) {
+  if (v === true) return 1;
+  if (v === false || v === null || v === undefined) return 0;
+  let s = clean(v).replace(/,/g, '.');
+  if (!s) return 0;
+  let n = Number(s);
+  if (isFinite(n)) return n;
+  let low = s.toLowerCase();
+  if (['yes','true','checked','نعم','تم','✓','✔'].includes(low)) return 1;
+  return 0;
 }
-function parseTime(v){
-  const s=clean(v);
-  const m=s.match(/(\d{1,2}):(\d{2})/);
-  return m?`${m[1].padStart(2,'0')}:${m[2]}`:'00:00';
+
+function deptKey(rawDept) {
+  let n = normalizeArabic(clean(rawDept)).toLowerCase();
+  if (n.includes('اسعاف') || n.includes('emergency')) return 'er';
+  if (n.includes('جراح') || n.includes('surg')) return 'surg';
+  if (n.includes('عنايه') || n.includes('تخدير') || n.includes('icu') || n.includes('anesthesia')) return 'icu';
+  return '';
 }
-function minutes(t1,t2){
-  const a=t1.split(':').map(Number),b=t2.split(':').map(Number);
-  if(a.some(isNaN)||b.some(isNaN))return 0;
-  let d=(b[0]*60+b[1])-(a[0]*60+a[1]);
-  if(d<0)d+=1440;
-  return d;
+
+function deptLabel(key) {
+  let cfg = DEPT_CONFIG.find(d => d.key === key);
+  return cfg ? cfg.label : 'غير محدد';
 }
-function hmf(m){
-  const h=Math.floor(m/60),x=m%60;
-  return `${h} ساعة${x?' و '+x+' دقيقة':''}`;
+
+function rowCaseTotal(r) {
+  let cfg = DEPT_CONFIG.find(d => d.key === r.deptKey);
+  if (!cfg) return 0;
+  return cfg.cols.reduce((s,i) => s + numeric(r.row[i]), 0);
 }
-function deptKey(name){
-  const n=clean(name);
-  const found=DEPT_CONFIG.find(d=>d.names.some(x=>normName(x)===normName(n)));
-  return found?found.key:'other';
+
+function buildDetailContent(r) {
+  let cfg = DEPT_CONFIG.find(d => d.key === r.deptKey);
+  if (!cfg) return '<em>لم يتم التعرف على تصنيف القسم لهذا السجل (تحقق من نص خانة القسم).</em>';
+  let items = cfg.cols.map(i => {
+    let label = headerLabel(i);
+    let raw = clean(r.row[i]);
+    if (!raw) return null;
+    return `<div><b>${label}:</b> ${raw}</div>`;
+  }).filter(Boolean);
+  if (items.length === 0) return '<em>لا توجد بيانات إضافية مسجّلة لهذا القسم في هذا السجل.</em>';
+  return items.join('');
 }
-function deptLabel(k){return k==='er'?'قسم الإسعاف':k==='surg'?'الأقسام الجراحية':k==='icu'?'التخدير والعناية':'غير محدد'}
-function resolveStudent(raw){
-  const s=clean(raw);
-  if(!s)return 'طالب غير مسجل';
-  const n=normName(s);
-  // Exact full-name match first.
-  const exact=KNOWN_STUDENTS.find(x=>normName(x)===n);
-  if(exact)return exact;
-  // Unique prefix/first-name match only. Ambiguous names stay as received.
-  const matches=KNOWN_STUDENTS.filter(x=>{
-    const first=normName(x).replace(/^د\s*/,'').split(' ')[0];
-    return first && first===n;
-  });
-  return matches.length===1?matches[0]:s;
+
+function toggleDetail(idx) {
+  let row = document.getElementById('detail-' + idx);
+  if (!row) return;
+  row.style.display = (row.style.display === 'none' || !row.style.display) ? 'table-row' : 'none';
 }
-function cell(row,i){return i<row.length?clean(row[i]):''}
-function numeric(v){
-  const s=clean(v).replace(',','.');
-  if(!s)return 0;
-  const n=Number(s);
-  return isFinite(n)?n:0;
+
+function parseTime(val) {
+  let str = clean(val);
+  let match = str.match(/(\d{1,2}):(\d{2})/);
+  if (match) return `${match[1].padStart(2, '0')}:${match[2]}`;
+  return '00:00';
 }
-function sectionDetails(row,key){
-  const cfg=DEPT_CONFIG.find(d=>d.key===key);
-  if(!cfg)return [];
-  return cfg.cols.map(i=>({label:HEADERS[i]||`العمود ${i+1}`,value:cell(row,i),index:i}))
-    .filter(x=>x.value!=='' && x.value!=='0' && x.value!=='0.0');
+
+function parseDate(val) {
+  let str = clean(val);
+  let match = str.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+  if (!match) return '';
+  let [, y, m, d] = match;
+  return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
 }
-function buildRows(data){
-  HEADERS=data[0].map(clean);
-  ROW_OBJECTS=data.slice(1).map(r=>{
-    const student=resolveStudent(cell(r,COLS.student));
-    const hosp=cell(r,COLS.hosp);
-    const date=parseDate(r[COLS.date]);
-    const tIn=parseTime(r[COLS.inTime]),tOut=parseTime(r[COLS.outTime]);
-    const dk=deptKey(cell(r,COLS.dept));
-    const totalMins=minutes(tIn,tOut);
-    return {row:r,student,hosp,date,tIn,tOut,dept:cell(r,COLS.dept),deptKey:dk,totalMins};
-  }).filter(x=>x.date);
+
+function calculateDurationMinutes(tIn, tOut) {
+  let [h1, m1] = tIn.split(':').map(Number);
+  let [h2, m2] = tOut.split(':').map(Number);
+  if (isNaN(h1) || isNaN(h2)) return 0;
+  let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
+  if (diff <= 0) diff += 1440;
+  return diff;
 }
-function fillSelect(id,values){
-  const el=document.getElementById(id),old=el.value;
-  el.innerHTML='<option value="">الكل</option>';
-  [...new Set(values.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ar')).forEach(v=>{
-    el.insertAdjacentHTML('beforeend',`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`);
-  });
-  if([...el.options].some(o=>o.value===old))el.value=old;
+
+function formatHoursMinutes(totalMinutes) {
+  let hrs = Math.floor(totalMinutes / 60);
+  let mins = totalMinutes % 60;
+  return `${hrs} ساعة ${mins > 0 ? 'و ' + mins + ' دقيقة' : ''}`;
 }
-function initFilters(){
-  fillSelect('fDoc',ROW_OBJECTS.map(r=>r.student));
-  fillSelect('fDept',ROW_OBJECTS.map(r=>r.dept));
-  fillSelect('fHosp',ROW_OBJECTS.map(r=>r.hosp));
+
+function getWeekLabel(dateStr) {
+  let d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  let day = d.getDay();
+  let diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  return new Date(d.setDate(diff)).toISOString().split('T')[0];
 }
-function getFiltered(){
-  const doc=document.getElementById('fDoc').value,dept=document.getElementById('fDept').value,
-        hosp=document.getElementById('fHosp').value,q=normName(document.getElementById('fSearch').value),
-        from=document.getElementById('fFrom').value,to=document.getElementById('fTo').value;
-  return ROW_OBJECTS.filter(r=>{
-    if(doc&&r.student!==doc)return false;
-    if(dept&&r.dept!==dept)return false;
-    if(hosp&&r.hosp!==hosp)return false;
-    if(from&&r.date<from)return false;
-    if(to&&r.date>to)return false;
-    if(q&&!normName(r.student).includes(q)&&!normName(r.hosp).includes(q)&&!normName(r.dept).includes(q))return false;
-    return true;
-  });
-}
-function render(){
-  const filtered=getFiltered();
-  document.getElementById('stCount').textContent=filtered.length;
-  document.getElementById('stDocs').textContent=new Set(filtered.map(r=>r.student)).size;
-  const total=filtered.reduce((s,r)=>s+r.totalMins,0);
-  document.getElementById('stHours').textContent=(total/60).toFixed(1)+' ساعة';
-  const actTotal=filtered.reduce((sum,r)=>{
-    const cfg=DEPT_CONFIG.find(d=>d.key===r.deptKey);
-    return sum+(cfg?cfg.cols.reduce((a,i)=>a+numeric(r.row[i]),0):0);
-  },0);
-  document.getElementById('stActs').textContent=actTotal;
-  document.getElementById('resultInfo').textContent=filtered.length+' سجل';
-  const from=document.getElementById('fFrom').value||'كل التواريخ',to=document.getElementById('fTo').value||'كل التواريخ';
-  document.getElementById('printMeta').textContent=`الفترة: ${from} → ${to} | القسم: ${document.getElementById('fDept').value||'الكل'} | الطالب: ${document.getElementById('fDoc').value||'الكل'} | عدد السجلات: ${filtered.length}`;
-  renderTable(filtered);
-  renderCharts(filtered);
-}
-function renderTable(data){
-  const head=document.getElementById('tHead'),body=document.getElementById('tBody');
-  head.innerHTML=`<tr>
-    <th>الطالب</th><th>القسم</th><th>المستشفى</th><th>التاريخ</th><th>الحضور</th><th>الانصراف</th><th>الساعات الفعلية</th><th>بيانات القسم</th>
-  </tr>`;
-  body.innerHTML=data.map(r=>{
-    const details=sectionDetails(r.row,r.deptKey);
-    const html=details.length?`<div class="detail-list">${details.map(d=>`<span class="detail"><b>${escapeHtml(d.label)}:</b> ${escapeHtml(d.value)}</span>`).join('')}</div>`:'—';
-    return `<tr>
-      <td><b>${escapeHtml(r.student)}</b></td>
-      <td>${escapeHtml(r.dept||deptLabel(r.deptKey))}</td>
-      <td>${escapeHtml(r.hosp)}</td>
-      <td>${escapeHtml(r.date)}</td>
-      <td>${escapeHtml(r.tIn)}</td>
-      <td>${escapeHtml(r.tOut)}</td>
-      <td><b>${hmf(r.totalMins)}</b></td>
-      <td>${html}</td>
-    </tr>`;
-  }).join('');
-  if(!data.length)body.innerHTML='<tr><td colspan="8" class="empty">لا توجد بيانات مطابقة للفلاتر الحالية</td></tr>';
-}
-function renderCharts(data){
-  Object.values(charts).forEach(c=>c&&c.destroy());
-  const docs=[...new Set(data.map(r=>r.student))];
-  charts.cDocs=new Chart(document.getElementById('cDocs'),{type:'bar',
-    data:{labels:docs,datasets:[{label:'مجموع الساعات',data:docs.map(d=>data.filter(r=>r.student===d).reduce((s,r)=>s+r.totalMins,0)/60),backgroundColor:'#5D131A'}]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false}});
-  const depts=[...new Set(data.map(r=>r.dept||deptLabel(r.deptKey)))];
-  charts.cDept=new Chart(document.getElementById('cDept'),{type:'doughnut',
-    data:{labels:depts,datasets:[{label:'الدقائق',data:depts.map(d=>data.filter(r=>(r.dept||deptLabel(r.deptKey))===d).reduce((s,r)=>s+r.totalMins,0))}]},
-    options:{responsive:true,maintainAspectRatio:false}});
-  const actMap={};
-  data.forEach(r=>{
-    const cfg=DEPT_CONFIG.find(d=>d.key===r.deptKey); if(!cfg)return;
-    cfg.cols.forEach(i=>{const v=numeric(r.row[i]); if(v)actMap[HEADERS[i]||`العمود ${i+1}`]=(actMap[HEADERS[i]||`العمود ${i+1}`]||0)+v;});
-  });
-  const acts=Object.keys(actMap);
-  charts.cActs=new Chart(document.getElementById('cActs'),{type:'bar',
-    data:{labels:acts,datasets:[{label:'الإجمالي',data:acts.map(k=>actMap[k]),backgroundColor:'#18272F'}]},
-    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y'}});
-  const map={};
-  data.forEach(r=>{map[r.date]=(map[r.date]||0)+r.totalMins/60});
-  const dates=Object.keys(map).sort();
-  charts.cTime=new Chart(document.getElementById('cTime'),{type:'line',
-    data:{labels:dates,datasets:[{label:'الساعات',data:dates.map(d=>map[d]),borderColor:'#5D131A',backgroundColor:'rgba(93,19,26,.1)',fill:true,tension:.3}]},
-    options:{responsive:true,maintainAspectRatio:false}});
-}
-function resetFilters(){
-  ['fFrom','fTo','fSearch'].forEach(id=>document.getElementById(id).value='');
-  ['fDoc','fDept','fHosp'].forEach(id=>document.getElementById(id).value='');
+
+function handleJSONPResponse(data) {
+  if (!data || !Array.isArray(data) || data.length < 2) return;
+
+  UNMATCHED_NAMES = new Set();
+  AUTO_CANON = {};
+  LIVE_HEADERS = (data[0] || []).map(h => clean(h));
+
+  // الترقيم الصحيح المطابق تماماً للصورة:
+  // D(3): student, E(4): hospital, F(5): اليوم, G(6): ساعة الحضور, H(7): ساعة الانصراف, I(8): القسم
+  const COL_STUDENT = 3;
+  const COL_HOSP = 4;
+  const COL_DATE = 5;
+  const COL_IN = 6;
+  const COL_OUT = 7;
+  const COL_DEPT = 8;
+
+  RAW_DATA = data.slice(1).map((r) => {
+    let student = formatStudentName(r[COL_STUDENT]);
+    let hosp = clean(r[COL_HOSP]) || 'مستشفى الحوادث أبو سليم';
+    let date = parseDate(r[COL_DATE]);
+    let tIn = parseTime(r[COL_IN]);
+    let tOut = parseTime(r[COL_OUT]);
+    let deptRaw = clean(r[COL_DEPT]) || 'غير محدد';
+    let deptKeyVal = deptKey(deptRaw);
+
+    let totalMins = calculateDurationMinutes(tIn, tOut);
+
+    return { student, dept: deptRaw, deptKey: deptKeyVal, hosp, date, tIn, tOut, totalMins, row: r };
+  }).filter(r => r.date !== '');
+
+  initFilters();
+  updateUnmatchedPanel();
   render();
 }
-function handleJSONPResponse(data){
-  if(!Array.isArray(data)||data.length<1){
-    document.getElementById('tBody').innerHTML='<tr><td colspan="8" class="empty">تعذر تحميل البيانات</td></tr>';
+
+function updateUnmatchedPanel() {
+  let panel = document.getElementById('unmatchedPanel');
+  let list = document.getElementById('unmatchedList');
+  if (UNMATCHED_NAMES.size === 0) {
+    panel.style.display = 'none';
     return;
   }
-  RAW_DATA=data;
-  buildRows(data);
-  initFilters();
-  render();
+  panel.style.display = 'block';
+  list.innerHTML = [...UNMATCHED_NAMES].map(n => `<span class="unmatched-chip">${n}</span>`).join('');
 }
-const script=document.createElement('script');
-script.src=`${SCRIPT_URL}?callback=handleJSONPResponse&_=${Date.now()}`;
-script.onerror=()=>document.getElementById('tBody').innerHTML='<tr><td colspan="8" class="empty">حدث خطأ أثناء الاتصال بمصدر البيانات</td></tr>';
+
+function initFilters() {
+  const fillSelect = (id, key) => {
+    let sel = document.getElementById(id);
+    let vals = [...new Set(RAW_DATA.map(r => r[key]).filter(Boolean))].sort();
+    sel.innerHTML = '<option value="">الكل</option>';
+    vals.forEach(v => sel.innerHTML += `<option value="${v}">${v}</option>`);
+  };
+  fillSelect('fDept', 'dept');
+  fillSelect('fHosp', 'hosp');
+
+  // الطبيب المتدرب: قائمة الطلبة الكاملة + أي اسم ورد فعلياً بالبيانات
+  // وليس موجوداً بعد بالقائمة الكاملة، حتى لا يختفي أي طالب من الفلتر
+  let namesFromData = RAW_DATA.map(r => r.student).filter(Boolean);
+  let allNames = [...new Set([...FULL_STUDENT_LIST, ...namesFromData])]
+    .sort((a,b) => a.localeCompare(b, 'ar'));
+  let selDoc = document.getElementById('fDoc');
+  selDoc.innerHTML = '<option value="">الكل</option>';
+  allNames.forEach(v => selDoc.innerHTML += `<option value="${v}">${v}</option>`);
+}
+
+function render() {
+  let doc = document.getElementById('fDoc').value;
+  let dept = document.getElementById('fDept').value;
+  let hosp = document.getElementById('fHosp').value;
+  let from = document.getElementById('fFrom').value;
+  let to = document.getElementById('fTo').value;
+  let q = document.getElementById('fSearch').value.toLowerCase();
+
+  let filtered = RAW_DATA.filter(r => {
+    if (doc && r.student !== doc) return false;
+    if (dept && r.dept !== dept) return false;
+    if (hosp && r.hosp !== hosp) return false;
+    if (from && r.date < from) return false;
+    if (to && r.date > to) return false;
+    if (q && !r.student.toLowerCase().includes(q) && !r.hosp.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  CURRENT_FILTERED = filtered;
+
+  document.getElementById('stCount').textContent = filtered.length;
+  document.getElementById('stDocs').textContent = [...new Set(filtered.map(r=>r.student))].length;
+
+  let totalMinutesAll = filtered.reduce((s,r)=>s+r.totalMins,0);
+  document.getElementById('stHours').textContent = (totalMinutesAll / 60).toFixed(1) + ' ساعة';
+
+  let totalCases = filtered.reduce((s,r)=>s+rowCaseTotal(r),0);
+  document.getElementById('stActs').textContent = totalCases;
+
+  document.getElementById('tBody').innerHTML = filtered.map((r, idx) => `
+    <tr>
+      <td><b>${r.student}</b></td>
+      <td>${r.dept}</td>
+      <td>${r.hosp}</td>
+      <td>${r.date}</td>
+      <td>${r.tIn}</td>
+      <td>${r.tOut}</td>
+      <td><b>${formatHoursMinutes(r.totalMins)}</b></td>
+      <td>${rowCaseTotal(r)}</td>
+      <td><button class="detail-toggle" onclick="toggleDetail(${idx})">تفاصيل ▾</button></td>
+    </tr>
+    <tr class="detail-row" id="detail-${idx}" style="display:none;">
+      <td colspan="9">${buildDetailContent(r)}</td>
+    </tr>
+  `).join('');
+
+  renderCharts(filtered);
+}
+
+function renderCharts(data) {
+  Object.values(charts).forEach(c => c && c.destroy());
+
+  let docs = [...new Set(data.map(r=>r.student))];
+  let docHours = docs.map(d => data.filter(r=>r.student===d).reduce((s,r)=>s+r.totalMins,0) / 60);
+  charts.cDocs = new Chart(document.getElementById('cDocs'), {
+    type: 'bar',
+    data: { labels: docs, datasets: [{ label: 'مجموع الساعات', data: docHours, backgroundColor: '#5D131A' }] },
+    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+  });
+
+  let depts = [...new Set(data.map(r=>r.dept))];
+  let deptHours = depts.map(d => data.filter(r=>r.dept===d).reduce((s,r)=>s+r.totalMins,0));
+  charts.cDept = new Chart(document.getElementById('cDept'), {
+    type: 'doughnut',
+    data: { labels: depts, datasets: [{ data: deptHours, backgroundColor: ['#5D131A','#3E7A5C','#C0A046','#18272F'] }] },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  // توزيع الإجراءات والحالات: يقرأ فقط أعمدة القسم المختار من الفلتر،
+  // أو الأقسام الثلاثة منفصلة إن لم يُختر قسم محدد
+  let selectedDept = document.getElementById('fDept').value;
+  let stats = getProcedureStats(data);
+  let labels = [], values = [], chartTitle = 'توزيع أنواع الإجراءات والحالات';
+
+  if (selectedDept) {
+    let k = deptKey(selectedDept);
+    let map = stats[k] || {};
+    labels = Object.keys(map);
+    values = labels.map(x => map[x]);
+    chartTitle = 'إحصائيات ' + (DEPT_CONFIG.find(d=>d.key===k)?.label || selectedDept);
+  } else {
+    ['er','surg','icu'].forEach(k => {
+      let map = stats[k] || {};
+      let cfg = DEPT_CONFIG.find(d => d.key === k);
+      Object.keys(map).forEach(label => {
+        labels.push(`${cfg.label} — ${label}`);
+        values.push(map[label]);
+      });
+    });
+    chartTitle = 'الإجراءات والحالات حسب الأقسام الثلاثة';
+  }
+
+  document.getElementById('cActsTitle').textContent = chartTitle;
+  charts.cActs = new Chart(document.getElementById('cActs'), {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'العدد الفعلي', data: values, backgroundColor: '#18272F' }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+    }
+  });
+
+  let weekMap = {};
+  data.forEach(r => {
+    let w = getWeekLabel(r.date);
+    if (w) weekMap[w] = (weekMap[w] || 0) + (r.totalMins / 60);
+  });
+  let sortedWeeks = Object.keys(weekMap).sort();
+
+  charts.cTime = new Chart(document.getElementById('cTime'), {
+    type: 'line',
+    data: {
+      labels: sortedWeeks.map(w => `أسبوع ${w}`),
+      datasets: [{ label: 'الساعات الأسبوعية', data: sortedWeeks.map(w => weekMap[w]), borderColor: '#5D131A', backgroundColor: 'rgba(93,19,26,0.1)', fill: true, tension: 0.3 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+}
+
+// يحسب مجموع كل عمود ضمن أعمدة كل قسم، لكن فقط من السجلات التي تخص
+// ذلك القسم فعلاً — إذا كان هناك قسم محدد في الفلتر يُحسب له فقط
+function getProcedureStats(data) {
+  let selectedDept = document.getElementById('fDept').value;
+  let keys = selectedDept ? [deptKey(selectedDept)] : ['er','surg','icu'];
+
+  let result = {};
+  keys.forEach(k => {
+    let cfg = DEPT_CONFIG.find(d => d.key === k);
+    if (!cfg) return;
+    let map = {};
+    data.filter(r => r.deptKey === k).forEach(r => {
+      cfg.cols.forEach(i => {
+        let label = headerLabel(i);
+        let v = numeric(r.row[i]);
+        if (v) map[label] = (map[label] || 0) + v;
+      });
+    });
+    result[k] = map;
+  });
+  return result;
+}
+
+// يبني تقريراً مُجمّعاً لكل طالب حسب القسم (وليس سجلاً بسجل كما في
+// الجدول التفاعلي): لكل طالب، صف لكل قسم عمل فيه ضمن الفلترة الحالية
+function buildPrintSummary(data) {
+  let byStudent = {};
+  data.forEach(r => {
+    if (!byStudent[r.student]) byStudent[r.student] = {};
+    let k = r.deptKey || 'other';
+    if (!byStudent[r.student][k]) {
+      byStudent[r.student][k] = { records: 0, hours: 0, cases: 0, hospitals: new Set(), lastDate: '' };
+    }
+    let b = byStudent[r.student][k];
+    b.records += 1;
+    b.hours += r.totalMins / 60;
+    b.cases += rowCaseTotal(r);
+    b.hospitals.add(r.hosp);
+    if (!b.lastDate || r.date > b.lastDate) b.lastDate = r.date;
+  });
+
+  let studentNames = Object.keys(byStudent).sort((a,b) => a.localeCompare(b, 'ar'));
+  if (studentNames.length === 0) {
+    return '<p>لا توجد سجلات مطابقة للفلاتر المطبقة.</p>';
+  }
+
+  return studentNames.map(name => {
+    let depts = byStudent[name];
+    let orderedKeys = ['er','surg','icu','other'].filter(k => depts[k]);
+    let rows = orderedKeys.map(k => {
+      let b = depts[k];
+      let label = k === 'other' ? 'غير مصنّف' : deptLabel(k);
+      return `<tr>
+        <td>${label}</td>
+        <td>${b.records}</td>
+        <td>${b.hours.toFixed(1)}</td>
+        <td>${b.cases}</td>
+        <td>${b.lastDate}</td>
+        <td>${[...b.hospitals].join('، ')}</td>
+      </tr>`;
+    }).join('');
+
+    let totalHours = orderedKeys.reduce((s,k) => s + depts[k].hours, 0);
+    let totalCases = orderedKeys.reduce((s,k) => s + depts[k].cases, 0);
+
+    return `<div class="print-student-block">
+      <h4>${name} — إجمالي: ${totalHours.toFixed(1)} ساعة / ${totalCases} حالة أو إجراء</h4>
+      <table>
+        <thead><tr><th>القسم</th><th>عدد السجلات</th><th>الساعات</th><th>الحالات/الإجراءات</th><th>آخر تاريخ</th><th>المستشفى</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  }).join('');
+}
+
+function printReport() {
+  let from = document.getElementById('fFrom').value;
+  let to = document.getElementById('fTo').value;
+  let doc = document.getElementById('fDoc').value;
+  let dept = document.getElementById('fDept').value;
+  let hosp = document.getElementById('fHosp').value;
+
+  let parts = [];
+  if (from) parts.push('من: ' + from);
+  if (to) parts.push('إلى: ' + to);
+  if (doc) parts.push('الطبيب المتدرب: ' + doc);
+  if (dept) parts.push('القسم: ' + dept);
+  if (hosp) parts.push('المستشفى: ' + hosp);
+
+  let now = new Date();
+  let stamp = now.toLocaleDateString('ar-LY') + ' - ' + now.toLocaleTimeString('ar-LY');
+
+  document.getElementById('printHeader').innerHTML =
+    `<p><b>تاريخ إصدار التقرير:</b> ${stamp}</p>` +
+    (parts.length ? `<p><b>الفلاتر المطبقة:</b> ${parts.join(' | ')}</p>` : `<p><b>الفلاتر المطبقة:</b> بدون فلاتر (كامل السجلات)</p>`);
+
+  document.getElementById('printSummary').innerHTML = buildPrintSummary(CURRENT_FILTERED);
+
+  window.print();
+}
+
+const script = document.createElement('script');
+script.src = `${SCRIPT_URL}?callback=handleJSONPResponse`;
 document.body.appendChild(script);
 </script>
 </body>
